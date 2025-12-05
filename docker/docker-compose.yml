@@ -1,3 +1,4 @@
+name: tube-digest
 services:
   tubedigest-web:
     build:
