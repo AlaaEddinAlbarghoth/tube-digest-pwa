@@ -1,0 +1,163 @@
+import { useEffect } from 'react';
+import { useSettingsStore } from '@/state/settingsStore';
+import { Card } from '@/components/shared/Card';
+import { Toggle } from '@/components/shared/Toggle';
+import { Button } from '@/components/shared/Button';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import type { ThemeMode } from '@/types/enums';
+
+export function SettingsPage() {
+    const {
+        preferences,
+        backendInfo,
+        loading,
+        loadSettings,
+        updatePreferences,
+        setTheme,
+    } = useSettingsStore();
+
+    useEffect(() => {
+        loadSettings();
+    }, [loadSettings]);
+
+    const themeOptions: { label: string; value: ThemeMode; icon: string }[] = [
+        { label: 'System', value: 'system', icon: '🖥️' },
+        { label: 'Light', value: 'light', icon: '☀️' },
+        { label: 'Dark', value: 'dark', icon: '🌙' },
+    ];
+
+    return (
+        <div className="p-4 pb-20 max-w-2xl mx-auto space-y-6">
+            {/* Preferences Section */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Preferences
+                </h2>
+
+                <Card className="divide-y divide-gray-200 dark:divide-gray-800">
+                    <div className="p-4">
+                        <Toggle
+                            checked={preferences.sortHighPriorityFirst}
+                            onChange={(checked) => updatePreferences({ sortHighPriorityFirst: checked })}
+                            label="Sort high priority first"
+                            description="Show high priority videos at the top of lists"
+                        />
+                    </div>
+
+                    <div className="p-4">
+                        <Toggle
+                            checked={preferences.showOnlyLast7Days}
+                            onChange={(checked) => updatePreferences({ showOnlyLast7Days: checked })}
+                            label="Show only last 7 days"
+                            description="Hide videos older than 7 days by default"
+                        />
+                    </div>
+                </Card>
+            </section>
+
+            {/* Theme Section */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Appearance
+                </h2>
+
+                <Card className="p-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Theme
+                    </p>
+                    <div className="grid grid-cols-3 gap-3">
+                        {themeOptions.map((option) => (
+                            <button
+                                key={option.value}
+                                onClick={() => setTheme(option.value)}
+                                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${preferences.theme === option.value
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                <span className="text-2xl">{option.icon}</span>
+                                <span className={`text-sm font-medium ${preferences.theme === option.value
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-700 dark:text-gray-300'
+                                    }`}>
+                                    {option.label}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </Card>
+            </section>
+
+            {/* Backend Info Section */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Backend Info
+                </h2>
+
+                <Card className="p-4">
+                    {loading ? (
+                        <div className="flex justify-center py-4">
+                            <LoadingSpinner />
+                        </div>
+                    ) : backendInfo ? (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                <span className="text-gray-500 dark:text-gray-400">API Version</span>
+                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.apiVersion}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                <span className="text-gray-500 dark:text-gray-400">Schedule</span>
+                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.schedule}</span>
+                            </div>
+                            {backendInfo.sheetId && (
+                                <div className="py-2">
+                                    <span className="text-gray-500 dark:text-gray-400 block mb-1">Sheet ID</span>
+                                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all">
+                                        {backendInfo.sheetId}
+                                    </code>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center py-4">
+                            <p className="text-gray-500 dark:text-gray-400 mb-3">Backend info unavailable</p>
+                            <Button variant="outline" size="sm" onClick={loadSettings}>
+                                Retry
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </section>
+
+            {/* About Section */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    About
+                </h2>
+
+                <Card className="p-6">
+                    <div className="text-center">
+                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4 shadow-lg">
+                            TD
+                        </div>
+                        <h3 className="font-bold text-xl text-gray-900 dark:text-white">TubeDigest</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Version 1.0.0</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-4 max-w-xs mx-auto">
+                            AI-powered YouTube subscription summaries. Stay on top of your favorite channels without watching every video.
+                        </p>
+
+                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open('https://github.com/AlaaEddinAlbarghoth/yt-subscriptions-summarizer', '_blank')}
+                            >
+                                View on GitHub
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            </section>
+        </div>
+    );
+}
