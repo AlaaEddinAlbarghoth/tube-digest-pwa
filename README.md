@@ -222,6 +222,9 @@ VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture and data flow
 - **[CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md)** - Code standards and patterns
 - **[FEATURES.md](docs/FEATURES.md)** - Feature documentation per page
+- **[Quickstart](docs/QUICKSTART.md)** - Quick setup guide
+- **[Reference](docs/reference/CODE_REFERENCE.md)** - Codebase reference
+- **[Reports](docs/reports/)** - Project status and progress reports
 
 ---
 
