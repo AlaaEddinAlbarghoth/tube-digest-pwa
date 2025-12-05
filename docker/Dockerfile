@@ -23,10 +23,10 @@ RUN apk add --no-cache gettext
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy entrypoint script
-COPY entrypoint.sh /docker-entrypoint.d/40-generate-config.sh
+COPY docker/entrypoint.sh /docker-entrypoint.d/40-generate-config.sh
 RUN chmod +x /docker-entrypoint.d/40-generate-config.sh
 
 # Expose port 80

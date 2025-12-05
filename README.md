@@ -120,6 +120,7 @@ cp .env.example .env
 # Edit .env and set BACKEND_BASE_URL
 
 # 2. Run with Docker Compose
+cd docker
 docker compose up --build
 
 # 3. Open http://localhost:5173
@@ -140,6 +141,7 @@ docker compose up --build
 
 1.  Build and run the container:
     ```bash
+    cd docker
     docker compose up -d --build
     ```
 2.  Access at `http://localhost:5173`.

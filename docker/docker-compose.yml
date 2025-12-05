@@ -1,12 +1,14 @@
 services:
   tubedigest-web:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: tubedigest-web
     restart: unless-stopped
     ports:
       - "5173:80"
     env_file:
-      - .env
+      - ../.env
     environment:
       - BACKEND_BASE_URL=${VITE_BACKEND_URL}
       - APP_ENV=production
