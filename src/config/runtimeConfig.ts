@@ -25,7 +25,11 @@ export const getRuntimeConfig = (): RuntimeConfig => {
     }
 
     // 1. Try reading from runtime injected config (Docker/Production)
-    if (typeof window !== 'undefined' && window.__TUBEDIGEST_CONFIG__) {
+    // Only use if backendBaseUrl is actually set (prevents empty config.js from overriding env vars)
+    if (typeof window !== 'undefined' &&
+        window.__TUBEDIGEST_CONFIG__ &&
+        window.__TUBEDIGEST_CONFIG__.backendBaseUrl &&
+        window.__TUBEDIGEST_CONFIG__.backendBaseUrl.length > 0) {
         cachedConfig = {
             backendBaseUrl: window.__TUBEDIGEST_CONFIG__.backendBaseUrl,
             appEnv: window.__TUBEDIGEST_CONFIG__.appEnv,
