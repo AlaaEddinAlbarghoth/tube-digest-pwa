@@ -140,6 +140,7 @@ export async function get<T>(
             headers: {
                 'Accept': 'application/json',
             },
+            cache: 'no-store',
         });
 
         return handleResponse<T>(response);
@@ -176,6 +177,7 @@ export async function post<T>(
                 'Accept': 'application/json',
             },
             body: body ? JSON.stringify(body) : undefined,
+            cache: 'no-store',
         });
 
         return handleResponse<T>(response);

@@ -71,14 +71,14 @@ export function SettingsPage() {
                                 key={option.value}
                                 onClick={() => setTheme(option.value)}
                                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${preferences.theme === option.value
-                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
                                 <span className="text-2xl">{option.icon}</span>
                                 <span className={`text-sm font-medium ${preferences.theme === option.value
-                                        ? 'text-blue-600 dark:text-blue-400'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-gray-700 dark:text-gray-300'
                                     }`}>
                                     {option.label}
                                 </span>
@@ -146,13 +146,38 @@ export function SettingsPage() {
                             AI-powered YouTube subscription summaries. Stay on top of your favorite channels without watching every video.
                         </p>
 
-                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => window.open('https://github.com/AlaaEddinAlbarghoth/yt-subscriptions-summarizer', '_blank')}
                             >
                                 View on GitHub
+                            </Button>
+
+                            <div className="text-xs text-gray-400 dark:text-gray-600 font-mono space-y-1">
+                                <p>Build: {typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__.substring(0, 7) : 'dev'}</p>
+                                <p>Date: {typeof __BUILD_TIME__ !== 'undefined' ? new Date(__BUILD_TIME__).toLocaleString() : 'local'}</p>
+                            </div>
+
+                            <Button
+                                variant="danger"
+                                size="xs"
+                                onClick={async () => {
+                                    if (confirm('Reset app cache and reload? This will clear offline data.')) {
+                                        if ('serviceWorker' in navigator) {
+                                            const registrations = await navigator.serviceWorker.getRegistrations();
+                                            for (const registration of registrations) {
+                                                await registration.unregister();
+                                            }
+                                        }
+                                        const keys = await caches.keys();
+                                        await Promise.all(keys.map(key => caches.delete(key)));
+                                        window.location.reload();
+                                    }
+                                }}
+                            >
+                                Reset App Cache
                             </Button>
                         </div>
                     </div>
