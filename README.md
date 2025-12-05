@@ -241,9 +241,18 @@ VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 - Check manifest.json in DevTools → Application
 
 ### API Connection Issues
-- Verify `VITE_BACKEND_URL` in `.env`
-- Check CORS settings in Apps Script
-- Inspect Network tab for failed requests
+- **Verify Backend URL:** Check `VITE_BACKEND_URL` in your Vercel/environment settings.
+- **Anonymous Access:** The Apps Script Web App **MUST** be set to execute as "Me" and access "Anyone" (Anonymous). If set to "Anyone with Google Account", the PWA will fail with CORS/Network errors because it cannot handle the login redirect flow.
+- **Test with Curl:** `curl -L "YOUR_BACKEND_URL?action=getBackendInfo"`. It should return JSON, not HTML.
+
+### Data Not Updating
+- **App Updates:** The PWA caches heavily. If meaningful changes (like backend URL) are made, you may need to:
+    1.  Open DevTools -> Application -> Service Workers -> **Unregister**.
+    2.  Reload the page (Cmd+Shift+R).
+- **Default Filters:** The app defaults to recent data (3d). Check if your backend has processed new videos recently using the Activity Log.
+
+### Styling / Dark Mode
+- **Tailwind v4 Note:** We use a custom variant `@custom-variant dark (&:where(.dark, .dark *));` in `src/styles/globals.css` because standard Tailwind v4 dark mode relies purely on system reference. This custom rule allows our specific `.dark` class toggle to work correctly to support manual theme switching.
 
 ---
 
