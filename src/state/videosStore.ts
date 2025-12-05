@@ -41,7 +41,7 @@ interface VideosState {
  * Default filters
  */
 const defaultFilters: VideoFilters = {
-    dateRange: '7d',
+    dateRange: '3d',
     status: 'all',
     priority: 'all',
     category: 'all',
