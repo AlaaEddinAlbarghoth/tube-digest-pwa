@@ -125,6 +125,25 @@ docker compose up --build
 # 3. Open http://localhost:5173
 ```
 
+## Deployment
+
+### Vercel (Recommended for Frontend)
+
+1.  Push your code to a GitHub repository.
+2.  Import the project into Vercel.
+3.  **Crucial Step:** In the Vercel Project Settings > **Environment Variables**, add:
+    *   **Key:** `VITE_BACKEND_URL`
+    *   **Value:** `https://script.google.com/macros/s/AKfycbxIcyOCoF1ELz2yRKFFpSH8Y_Uu38KaJoDXpjeYXkM7_ue-0mhL9UqQ5-ZdXz3ldPyk/exec` (Your Apps Script Web App URL)
+4.  Deploy.
+
+### Docker
+
+1.  Build and run the container:
+    ```bash
+    docker compose up -d --build
+    ```
+2.  Access at `http://localhost:5173`.
+
 ### Build for Production
 
 ```bash
