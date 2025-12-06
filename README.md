@@ -282,7 +282,13 @@ docker compose up --build
 3.  **Crucial Step:** In the Vercel Project Settings > **Environment Variables**, add:
     *   **Key:** `VITE_BACKEND_URL`
     *   **Value:** `https://script.google.com/macros/s/AKfycbxIcyOCoF1ELz2yRKFFpSH8Y_Uu38KaJoDXpjeYXkM7_ue-0mhL9UqQ5-ZdXz3ldPyk/exec` (Your Apps Script Web App URL)
-4.  Deploy.
+4.  **Configure Deployment Settings:**
+    *   Go to **Project Settings** > **Git**
+    *   Set **Production Branch** to `main`
+    *   Enable **Automatic Deployments** for the `main` branch
+    *   **Disable Preview Deployments** (uncheck "Create Preview Deployments for Pull Requests")
+    *   This ensures only production deploys from `main`, no preview branches
+5.  Deploy.
 
 ### Docker
 
