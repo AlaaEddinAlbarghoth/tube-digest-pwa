@@ -25,6 +25,7 @@ export function VideosListPage() {
     } = useVideosStore();
 
     const { channels, channelIds, fetchChannels } = useChannelsStore();
+    // Get backend info for dynamic categories and priorities
     const { backendInfo } = useSettingsStore();
 
     useEffect(() => {
@@ -48,9 +49,6 @@ export function VideosListPage() {
         { label: 'Processed', value: 'processed' },
         { label: 'Read', value: 'read' },
     ];
-
-    // Get backend info for dynamic categories and priorities
-    const { backendInfo } = useSettingsStore();
 
     // Dynamic priorities from backend
     const priorities: { label: string; value: Priority | null }[] = [
