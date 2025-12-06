@@ -87,6 +87,89 @@ tube-digest-pwa/
 
 ---
 
+## 🌐 RTL and BiDi Support
+
+The PWA uses **text-level RTL** for Arabic content while keeping the overall application layout **LTR** (Left-to-Right). This ensures proper rendering of Arabic text without flipping the entire UI.
+
+### Layout Direction
+
+**App-Level Direction:**
+- The app layout is **LTR by default** (`document.documentElement.dir = "ltr"`)
+- RTL is applied **only at the text element level** when Arabic characters are detected
+- This keeps navigation, filters, settings, and other UI components in their natural LTR layout
+
+### BiDi Utility Classes
+
+The following utility classes are available in `src/styles/globals.css`:
+
+- `.rtl-text` - Sets direction RTL, text-align right, and `unicode-bidi: plaintext` for Arabic content
+- `.ltr-text` - Sets direction LTR, text-align left, and `unicode-bidi: plaintext` for English/URLs/code
+- `.bidi-plain` - Applies `unicode-bidi: plaintext` for mixed content
+- `.bidi-isolate` - Applies `unicode-bidi: isolate` for isolated bidirectional text
+
+### Arabic Detection Helper
+
+A reusable helper is available in `src/utils/bidi.ts`:
+
+```typescript
+import { bidiTextClass, bidiPlainClass, hasArabic } from '@/utils/bidi';
+
+// Check if string contains Arabic
+hasArabic(text); // returns boolean
+
+// Get appropriate class for text
+bidiTextClass(text); // returns "rtl-text" or "ltr-text"
+
+// Get class with plaintext isolation (for mixed content)
+bidiPlainClass(text); // returns "rtl-text bidi-plain" or "ltr-text"
+```
+
+### Text-Level RTL Application
+
+**Apply RTL only to text elements that contain Arabic:**
+
+- **Video titles** - Use `bidiTextClass(video.title)`
+- **Channel names** - Use `bidiTextClass(channel.name)`
+- **Summaries** - Use `bidiPlainClass(summary)` for mixed content
+- **Category labels** - Use `bidiTextClass(category)`
+- **Key ideas and action items** - Use `bidiPlainClass(idea)`
+- **Empty state descriptions** - Use `bidiTextClass(description)` if Arabic
+
+**Always use LTR for:**
+- Date/time strings (English format: "MMM d, yyyy", "h:mm a", etc.)
+- URLs and YouTube video IDs
+- Code snippets or technical identifiers (Sheet IDs, build hashes)
+- Timestamps and relative time strings ("2 hours ago")
+- Numeric metadata values in English format
+
+### Automatic Detection
+
+- The `Chip` component uses `bidiTextClass()` to automatically detect Arabic and apply RTL
+- This ensures category and priority filter chips render correctly without manual intervention
+- "All" and English labels remain LTR
+
+### Developer Guidelines
+
+1. **Never wrap entire pages or containers with RTL classes**
+2. **Apply RTL classes only to the exact text nodes** that may contain Arabic
+3. **Use `bidiTextClass()` helper** for simple text elements
+4. **Use `bidiPlainClass()` helper** for mixed content (summaries, key ideas)
+5. **Always use explicit `.ltr-text`** for technical values, dates, and code
+
+### Known Edge Cases
+
+1. **Mixed Arabic/English in summaries**: The `bidiPlainClass()` helper with `unicode-bidi: plaintext` handles inline English phrases automatically.
+
+2. **Date/time formatting**: All date/time strings use explicit `.ltr-text` to ensure proper formatting.
+
+3. **Filter chips**: The `Chip` component automatically detects Arabic using `bidiTextClass()`, so category and priority filters work correctly.
+
+4. **Technical identifiers**: Sheet IDs, build hashes, and other code-like values always use explicit `.ltr-text` to maintain readability.
+
+5. **Channel names with mixed content**: Channel names use `bidiTextClass()` which detects Arabic and applies RTL, while embedded English renders correctly due to `unicode-bidi: plaintext`.
+
+---
+
 ## 🎛️ Filter Model
 
 The PWA uses a unified filter state model with consistent "All" semantics across all filter types.
