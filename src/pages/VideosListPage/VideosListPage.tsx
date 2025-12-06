@@ -114,7 +114,7 @@ export function VideosListPage() {
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status:</span>
                         {statuses.map((s) => (
                             <Chip
-                                key={s.value}
+                                key={s.value ?? 'all'}
                                 label={s.label}
                                 isActive={filters.status === s.value}
                                 onClick={() => setFilters({ status: s.value })}
@@ -127,7 +127,7 @@ export function VideosListPage() {
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Priority:</span>
                         {priorities.map((p) => (
                             <Chip
-                                key={p.value}
+                                key={p.value ?? 'all'}
                                 label={p.label}
                                 isActive={filters.priority === p.value}
                                 onClick={() => setFilters({ priority: p.value })}
@@ -161,7 +161,7 @@ export function VideosListPage() {
                             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category:</span>
                             {categories.map((c) => (
                                 <Chip
-                                    key={c.value}
+                                    key={c.value ?? 'all'}
                                     label={c.label}
                                     isActive={filters.category === c.value}
                                     onClick={() => setFilters({ category: c.value })}
