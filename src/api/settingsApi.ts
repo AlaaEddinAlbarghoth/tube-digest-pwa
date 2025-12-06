@@ -24,6 +24,7 @@ export interface BackendInfo {
     maxSummariesPerRun?: number;
     lastSuccessfulRunAt?: string | null;
     windowStatus3d?: WindowStatus3d | null;
+    allowedCategories?: string[]; // Controlled category taxonomy (Arabic)
 }
 
 /**

@@ -58,6 +58,14 @@ export function TodayDigestPage() {
         { label: 'Low', value: 'low' },
     ];
 
+    // Dynamic categories from backend
+    const categories: { label: string; value: 'all' | string }[] = [
+        { label: 'All', value: 'all' },
+        ...(backendInfo?.allowedCategories && backendInfo.allowedCategories.length > 0
+            ? backendInfo.allowedCategories.map((cat) => ({ label: cat, value: cat }))
+            : [])
+    ];
+
     const handleOpenYouTube = (youtubeVideoId: string) => {
         window.open(`https://youtube.com/watch?v=${youtubeVideoId}`, '_blank');
     };
@@ -129,6 +137,21 @@ export function TodayDigestPage() {
                             />
                         ))}
                     </div>
+
+                    {/* Category filters */}
+                    {categories.length > 1 && (
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Category:</span>
+                            {categories.map((c) => (
+                                <Chip
+                                    key={c.value}
+                                    label={c.label}
+                                    isActive={filters.category === c.value}
+                                    onClick={() => setFilters({ category: c.value })}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

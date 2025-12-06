@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useChannelsStore } from '@/state/channelsStore';
+import { useSettingsStore } from '@/state/settingsStore';
 import { VideoCard } from '@/components/features/VideoCard';
 import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
@@ -52,6 +53,17 @@ export function VideosListPage() {
         { label: 'High', value: 'high' },
         { label: 'Medium', value: 'medium' },
         { label: 'Low', value: 'low' },
+    ];
+
+    // Get backend info for dynamic categories
+    const { backendInfo } = useSettingsStore();
+    
+    // Dynamic categories from backend
+    const categories: { label: string; value: 'all' | string }[] = [
+        { label: 'All', value: 'all' },
+        ...(backendInfo?.allowedCategories && backendInfo.allowedCategories.length > 0
+            ? backendInfo.allowedCategories.map((cat) => ({ label: cat, value: cat }))
+            : [])
     ];
 
     const handleOpenYouTube = (youtubeVideoId: string) => {
@@ -132,6 +144,21 @@ export function VideosListPage() {
                             ))}
                         </div>
                     )}
+
+                    {/* Category filters */}
+                    {categories.length > 1 && (
+                        <div className="flex items-center gap-2 min-w-max overflow-x-auto">
+                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category:</span>
+                            {categories.map((c) => (
+                                <Chip
+                                    key={c.value}
+                                    label={c.label}
+                                    isActive={filters.category === c.value}
+                                    onClick={() => setFilters({ category: c.value })}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -173,7 +200,7 @@ export function VideosListPage() {
                     <EmptyState
                         icon="🔍"
                         title="No videos found"
-                        description={filters.search ? `No results for "${filters.search}"` : "Try adjusting your filters."}
+                        description={filters.search ? `No results for "${filters.search}"` : "لا توجد فيديوهات ضمن هذه الفلاتر"}
                     />
                 )}
             </div>
