@@ -88,6 +88,93 @@ export function SettingsPage() {
                 </Card>
             </section>
 
+            {/* Freshness Section */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Freshness
+                </h2>
+
+                <Card className="p-4">
+                    {loading ? (
+                        <div className="flex justify-center py-4">
+                            <LoadingSpinner />
+                        </div>
+                    ) : backendInfo ? (
+                        <div className="space-y-4">
+                            {backendInfo.lastSuccessfulRunAt && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                    <span className="text-gray-500 dark:text-gray-400">Last Successful Run</span>
+                                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                                        {new Date(backendInfo.lastSuccessfulRunAt).toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
+                            {backendInfo.videosWindowDays && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                    <span className="text-gray-500 dark:text-gray-400">Window Days</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{backendInfo.videosWindowDays}d</span>
+                                </div>
+                            )}
+                            {backendInfo.windowStatus3d && (
+                                <>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                        <span className="text-gray-500 dark:text-gray-400">Total in Window</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{backendInfo.windowStatus3d.totalInWindow}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                        <span className="text-gray-500 dark:text-gray-400">Processed</span>
+                                        <span className="font-medium text-green-600 dark:text-green-400">{backendInfo.windowStatus3d.processedInWindow}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                        <span className="text-gray-500 dark:text-gray-400">New</span>
+                                        <span className={`font-medium ${backendInfo.windowStatus3d.newInWindow > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'}`}>
+                                            {backendInfo.windowStatus3d.newInWindow}
+                                        </span>
+                                    </div>
+                                    {backendInfo.windowStatus3d.oldestNewTimestamp && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-500 dark:text-gray-400">Oldest NEW</span>
+                                            <span className="font-medium text-gray-900 dark:text-white text-xs">
+                                                {new Date(backendInfo.windowStatus3d.oldestNewTimestamp).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            {backendInfo.maxSummariesPerRun && (
+                                <div className="flex items-center justify-between py-2">
+                                    <span className="text-gray-500 dark:text-gray-400">Max Summaries/Run</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{backendInfo.maxSummariesPerRun}</span>
+                                </div>
+                            )}
+                            <div className="pt-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async () => {
+                                        await loadSettings();
+                                        // Also refresh videos list if available
+                                        if (window.location.pathname !== '/settings') {
+                                            window.location.reload();
+                                        }
+                                    }}
+                                    className="w-full"
+                                >
+                                    Refresh Data
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-4">
+                            <p className="text-gray-500 dark:text-gray-400 mb-3">Freshness data unavailable</p>
+                            <Button variant="outline" size="sm" onClick={loadSettings}>
+                                Retry
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </section>
+
             {/* Backend Info Section */}
             <section>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
+import { useSettingsStore } from '@/state/settingsStore';
 import { VideoCard } from '@/components/features/VideoCard';
 import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
@@ -22,6 +23,8 @@ export function TodayDigestPage() {
         setFilters
     } = useVideosStore();
 
+    const { backendInfo, loadSettings } = useSettingsStore();
+
     const [activeTab, setActiveTab] = useState<TabValue>('7d');
 
     // Sync tab with dateRange filter
@@ -31,7 +34,8 @@ export function TodayDigestPage() {
 
     useEffect(() => {
         fetchVideos();
-    }, [fetchVideos]);
+        loadSettings();
+    }, [fetchVideos, loadSettings]);
 
     const filteredVideos = videoIds.map(id => videos[id]);
 
@@ -130,6 +134,22 @@ export function TodayDigestPage() {
 
             {/* Video List */}
             <div className="flex-1 overflow-y-auto p-4">
+                {/* Freshness Hint */}
+                {backendInfo?.windowStatus3d && (
+                    <div className="mb-3 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                        <div className="flex items-center justify-between">
+                            <span>
+                                Window {backendInfo.videosWindowDays || 3}d. New in window: <span className={`font-medium ${backendInfo.windowStatus3d.newInWindow > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-700 dark:text-gray-300'}`}>{backendInfo.windowStatus3d.newInWindow}</span>
+                            </span>
+                            {backendInfo.lastSuccessfulRunAt && (
+                                <span className="text-gray-400 dark:text-gray-500">
+                                    Last run: {new Date(backendInfo.lastSuccessfulRunAt).toLocaleTimeString()}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {loading && filteredVideos.length === 0 ? (
                     <div className="flex justify-center py-12">
                         <LoadingSpinner size="lg" />

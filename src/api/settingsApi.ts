@@ -2,12 +2,28 @@ import { get, post } from './client';
 import type { UserPreferences } from '@/types/preferences';
 
 /**
+ * Window status for the 3-day window
+ */
+export interface WindowStatus3d {
+    totalInWindow: number;
+    processedInWindow: number;
+    newInWindow: number;
+    oldestNewTimestamp: string | null;
+    maxSummariesPerRun: number;
+}
+
+/**
  * Backend configuration information
  */
 export interface BackendInfo {
     schedule: string;
     apiVersion: string;
     sheetId?: string;
+    defaultRange?: string;
+    videosWindowDays?: number;
+    maxSummariesPerRun?: number;
+    lastSuccessfulRunAt?: string | null;
+    windowStatus3d?: WindowStatus3d | null;
 }
 
 /**
