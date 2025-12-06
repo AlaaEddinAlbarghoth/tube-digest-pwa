@@ -301,20 +301,17 @@ Examples:
 
 **Every change-set MUST end with these steps in order:**
 
-1. **Type Check**
+1. **Local Verification**
    ```bash
-   pnpm typecheck
+   pnpm install          # Ensure dependencies are up to date
+   pnpm typecheck        # Verify TypeScript types are correct
+   pnpm build            # Ensure build completes successfully
    ```
-   - Must pass with no errors
-
-2. **Build**
-   ```bash
-   pnpm build
-   ```
-   - Must complete successfully
+   - Type check must pass with no errors
+   - Build must complete successfully
    - Check for build warnings
 
-3. **Local Dev Verification**
+2. **Local Dev Verification**
    ```bash
    pnpm dev
    ```
@@ -322,16 +319,17 @@ Examples:
    - Verify no console errors
    - Check responsive behavior
 
-4. **Commit**
+3. **Commit**
    - Use clear, descriptive commit messages (see Commit Message Conventions below)
    - Commit only related changes together
    - Example: `git commit -m "refactor: unify PWA filter state and query building"`
 
-5. **Push to GitHub**
+4. **Push to GitHub**
    - Always push immediately after committing
    - Example: `git push origin main`
+   - **Deployment is handled by Vercel automatic builds on push to main.**
 
-6. **Deployed Verification (Vercel)**
+5. **Deployed Verification (Vercel)**
    - Wait for Vercel auto-deploy to complete
    - Test on production URL
    - Verify PWA cache updates correctly
