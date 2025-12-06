@@ -25,6 +25,7 @@ export interface BackendInfo {
     lastSuccessfulRunAt?: string | null;
     windowStatus3d?: WindowStatus3d | null;
     allowedCategories?: string[]; // Controlled category taxonomy (Arabic)
+    allowedPriorities?: string[]; // Controlled priority taxonomy
 }
 
 /**

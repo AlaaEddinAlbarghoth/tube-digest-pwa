@@ -51,11 +51,19 @@ export function TodayDigestPage() {
         { label: 'Read', value: 'read' },
     ];
 
+    // Dynamic priorities from backend
     const priorities: { label: string; value: 'all' | Priority }[] = [
         { label: 'All', value: 'all' },
-        { label: 'High', value: 'high' },
-        { label: 'Medium', value: 'medium' },
-        { label: 'Low', value: 'low' },
+        ...(backendInfo?.allowedPriorities && backendInfo.allowedPriorities.length > 0
+            ? backendInfo.allowedPriorities.map((p) => ({
+                label: p.charAt(0).toUpperCase() + p.slice(1), // Capitalize first letter
+                value: p as Priority
+            }))
+            : [
+                { label: 'High', value: 'high' },
+                { label: 'Medium', value: 'medium' },
+                { label: 'Low', value: 'low' }
+            ]) // Fallback to default if backend info not available
     ];
 
     // Dynamic categories from backend

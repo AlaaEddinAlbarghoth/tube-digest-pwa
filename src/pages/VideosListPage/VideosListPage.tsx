@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useChannelsStore } from '@/state/channelsStore';
 import { useSettingsStore } from '@/state/settingsStore';
+import { useSettingsStore } from '@/state/settingsStore';
 import { VideoCard } from '@/components/features/VideoCard';
 import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
@@ -25,6 +26,7 @@ export function VideosListPage() {
     } = useVideosStore();
 
     const { channels, channelIds, fetchChannels } = useChannelsStore();
+    const { backendInfo } = useSettingsStore();
 
     useEffect(() => {
         fetchVideos();
@@ -48,11 +50,19 @@ export function VideosListPage() {
         { label: 'Read', value: 'read' },
     ];
 
+    // Dynamic priorities from backend
     const priorities: { label: string; value: 'all' | Priority }[] = [
         { label: 'All', value: 'all' },
-        { label: 'High', value: 'high' },
-        { label: 'Medium', value: 'medium' },
-        { label: 'Low', value: 'low' },
+        ...(backendInfo?.allowedPriorities && backendInfo.allowedPriorities.length > 0
+            ? backendInfo.allowedPriorities.map((p) => ({
+                label: p.charAt(0).toUpperCase() + p.slice(1), // Capitalize first letter
+                value: p as Priority
+            }))
+            : [
+                { label: 'High', value: 'high' },
+                { label: 'Medium', value: 'medium' },
+                { label: 'Low', value: 'low' }
+            ]) // Fallback to default if backend info not available
     ];
 
     // Get backend info for dynamic categories
