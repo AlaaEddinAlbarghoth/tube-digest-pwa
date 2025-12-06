@@ -676,6 +676,96 @@ Keep descriptions concise but descriptive. If needed, add a body paragraph expla
 
 ---
 
+## 🔍 Freshness Gap Troubleshooting
+
+If the PWA shows older videos than what's in the Google Sheet, follow this systematic troubleshooting checklist.
+
+### Root Causes to Check
+
+1. **Sheet ID Mismatch**
+   - The backend may be reading from a different sheet than expected
+   - Verify: Call `getBackendInfo` and check `sheetId` matches your production sheet
+
+2. **API Response Caching**
+   - Browser or Service Worker may be caching old API responses
+   - Verify: Check Network tab in DevTools for `listVideos` calls
+
+3. **Date/Time Parsing Issues**
+   - Videos may be filtered out due to timezone or parsing errors
+   - Verify: Check backend logs for "handleListVideos_: Newest video" line
+
+4. **Column Resolution Issues**
+   - Headers may have changed, causing wrong column reads
+   - Verify: Check `VIDEOS_HEADERS` and `VIDEOS_COL_INDEXES` in `checkBackfillStatus` logs
+
+5. **Store State Not Clearing**
+   - Frontend may be appending to old state instead of replacing
+   - Verify: Check `videosStore.ts` - `fetchVideos` already clears state before fetching
+
+### 5-Step Operator Checklist
+
+**Step 1: Verify Sheet Ground Truth**
+- Open Google Sheet directly
+- In Videos sheet, find newest row within last 3 days
+- Record: Date, Time, VideoId, Status
+
+**Step 2: Verify Backend Sheet Binding**
+```bash
+# Call getBackendInfo
+curl "YOUR_BACKEND_URL?action=getBackendInfo&apiToken=YOUR_TOKEN"
+
+# Verify:
+# - sheetId matches your production sheet
+# - apiVersion is current
+# - lastSuccessfulRunAt is recent
+```
+
+**Step 3: Test API Directly**
+```bash
+# Call listVideos with cache-buster
+curl "YOUR_BACKEND_URL?action=listVideos&range=3d&apiToken=YOUR_TOKEN&_cb=$(date +%s)"
+
+# Verify:
+# - Newest video from Step 1 appears in response
+# - publishedAt timestamp matches Sheet Date+Time
+# - Response is JSON (not cached HTML)
+```
+
+**Step 4: Check PWA Network Tab**
+- Open deployed PWA with DevTools
+- Go to Network tab
+- Filter by "listVideos"
+- Verify:
+  - Request URL includes `_cb=` cache-buster
+  - Response includes newest video from Step 1
+  - Response headers don't show caching (if visible)
+
+**Step 5: Reset PWA Cache**
+- Go to Settings page
+- Click "Reset App Cache"
+- Reload page
+- Verify newest video now appears
+
+### Debug Tools
+
+**Backend:**
+- `checkBackfillStatus(3)` - Shows window status and column indices
+- `inspectVideoStatuses(3)` - Shows status histogram
+- Backend logs show "handleListVideos_: Newest video" with ID and timestamp
+
+**Frontend:**
+- DevTools Network tab - Shows actual API requests/responses
+- DevTools Application tab - Shows Service Worker and cache status
+- Console logs - Check for API errors
+
+### Prevention Measures
+
+- ✅ Frontend uses `cache: 'no-store'` in fetch options
+- ✅ Frontend adds `_cb=` cache-buster to `listVideos` requests
+- ✅ Service Worker uses `NetworkOnly` with no cacheable responses for API endpoints
+- ✅ Store clears videos before fetching new data
+- ✅ Backend logs newest video for verification
+
 ## 🔧 Troubleshooting
 
 ### Build Errors

@@ -42,10 +42,16 @@ export default defineConfig({
         clientsClaim: true,
         runtimeCaching: [
           {
-            // NetworkOnly for Backend API
+            // NetworkOnly for Backend API - NEVER cache API responses
+            // This ensures fresh data on every request
             urlPattern: /^https:\/\/script\.google\.com\/macros\/.*/i,
             handler: 'NetworkOnly',
             options: {
+              // Explicitly disable caching
+              cacheableResponse: {
+                statuses: [] // Don't cache any responses
+              },
+              // Background sync for offline retries only
               backgroundSync: {
                 name: 'apiQueue',
                 options: {

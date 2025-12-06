@@ -103,6 +103,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 /**
  * Build URL with query parameters for Apps Script
  * Uses `?action=actionName` pattern
+ * 
+ * IMPORTANT: Adds cache-buster parameter for listVideos to prevent stale data
  */
 function buildUrl(action: string, params?: Record<string, string | number | boolean | undefined>): string {
     const baseUrl = API_CONFIG.baseUrl;
@@ -127,6 +129,12 @@ function buildUrl(action: string, params?: Record<string, string | number | bool
                 url.searchParams.set(key, String(value));
             }
         });
+    }
+
+    // Add cache-buster for listVideos to prevent stale data
+    // This ensures the browser and Service Worker don't cache responses
+    if (action === 'listVideos') {
+        url.searchParams.set('_cb', Date.now().toString());
     }
 
     return url.toString();
