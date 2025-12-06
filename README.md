@@ -281,6 +281,208 @@ VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 
 ---
 
+## 🔧 Engineering Workflow and Verification
+
+### Change-Set Definition
+
+A **change-set** is a logical unit of work that:
+- Solves one specific problem or adds one feature
+- Is self-contained and testable
+- Can be verified independently
+- Has clear success criteria
+
+Examples:
+- Adding a new filter option
+- Fixing filter state inconsistency
+- Updating UI components
+- Refactoring store logic
+
+### Mandatory Workflow Per Change-Set
+
+**Every change-set MUST end with these steps in order:**
+
+1. **Type Check**
+   ```bash
+   pnpm typecheck
+   ```
+   - Must pass with no errors
+
+2. **Build**
+   ```bash
+   pnpm build
+   ```
+   - Must complete successfully
+   - Check for build warnings
+
+3. **Local Dev Verification**
+   ```bash
+   pnpm dev
+   ```
+   - Test changed functionality in browser
+   - Verify no console errors
+   - Check responsive behavior
+
+4. **Commit**
+   - Use clear, descriptive commit messages (see Commit Message Conventions below)
+   - Commit only related changes together
+   - Example: `git commit -m "refactor: unify PWA filter state and query building"`
+
+5. **Push to GitHub**
+   - Always push immediately after committing
+   - Example: `git push origin main`
+
+6. **Deployed Verification (Vercel)**
+   - Wait for Vercel auto-deploy to complete
+   - Test on production URL
+   - Verify PWA cache updates correctly
+
+### Local Dev Verification Steps
+
+**Before committing, verify:**
+
+1. **Build and Type Check:**
+   ```bash
+   pnpm typecheck && pnpm build
+   ```
+
+2. **Dev Server:**
+   ```bash
+   pnpm dev
+   ```
+   - Open browser to `http://localhost:5173`
+   - Test all affected pages
+   - Check browser console for errors
+
+3. **Filter Functionality:**
+   - Test date range chips (Today, 3d, 7d)
+   - Test status filter (All, New, Read)
+   - Test category filter (All + dynamic categories)
+   - Test priority filter (All + dynamic priorities)
+   - Verify filters work together correctly
+
+4. **Theme Switching:**
+   - Toggle between light/dark/system themes
+   - Verify theme persists across page navigation
+
+5. **PWA Cache:**
+   - Open DevTools → Application → Service Workers
+   - Test "Reset App Cache" in Settings
+   - Verify service worker updates correctly
+
+### Deployed Verification Steps (Vercel)
+
+**After push and Vercel deploy:**
+
+1. **Production URL:**
+   - Open deployed PWA URL
+   - Verify no console errors
+   - Check network tab for API calls
+
+2. **PWA Cache Hard Refresh:**
+   - Open DevTools → Application → Clear storage
+   - Click "Clear site data"
+   - Reload page
+   - Verify app loads correctly
+
+3. **Service Worker Reset:**
+   - DevTools → Application → Service Workers
+   - Click "Unregister" if needed
+   - Reload page to re-register
+   - Verify new version is active
+
+4. **Filter UI Verification:**
+   - Test all filter chips render correctly
+   - Verify "All" chips work (null semantics)
+   - Check dynamic categories/priorities load from backend
+   - Test filter combinations
+
+### Recheck After Time (6-24 Hours)
+
+After deploying changes, recheck within 6-24 hours:
+
+1. **Production Stability:**
+   - Verify no error reports in Vercel logs
+   - Check browser console for runtime errors
+   - Confirm API calls are successful
+
+2. **PWA Updates:**
+   - Test on mobile device if possible
+   - Verify service worker updates automatically
+   - Check offline functionality still works
+
+3. **Backend Integration:**
+   - Verify `getBackendInfo` returns expected data
+   - Confirm `allowedCategories` and `allowedPriorities` are consumed correctly
+   - Test filter queries match backend expectations
+
+### Operator Checklist (Before Declaring Fix Done)
+
+Use this checklist before marking any change-set as complete:
+
+**Build and Type Check:**
+- ✅ `pnpm typecheck` passes
+- ✅ `pnpm build` completes without errors
+
+**Local UI Sanity:**
+- ✅ Date range chips work (Today, 3d, 7d)
+- ✅ Status filter works (All, New, Read)
+- ✅ Category filter works (All + dynamic categories from backend)
+- ✅ Priority filter works (All + dynamic priorities from backend)
+- ✅ Theme switching works (light/dark/system)
+- ✅ Filters work together (no conflicts)
+
+**Backend API Sanity:**
+```bash
+# Test getBackendInfo
+curl "YOUR_BACKEND_URL?action=getBackendInfo&token=YOUR_TOKEN"
+
+# Test listVideos
+curl "YOUR_BACKEND_URL?action=listVideos&range=3d&token=YOUR_TOKEN"
+```
+
+**Expected Results:**
+- ✅ `getBackendInfo` returns valid JSON with `allowedCategories` and `allowedPriorities`
+- ✅ `listVideos` returns array of videos with correct structure
+- ✅ No CORS errors or 500 responses
+
+**PWA Cache and Service Worker:**
+- ✅ Service worker registers correctly
+- ✅ "Reset App Cache" button works
+- ✅ Hard refresh clears stale data
+- ✅ New deployments update service worker
+
+**Production Verification:**
+- ✅ Vercel deploy succeeds
+- ✅ Production URL loads without errors
+- ✅ All filter chips render correctly
+- ✅ API calls succeed in production
+
+### Commit Message Conventions
+
+Use these prefixes for commit messages:
+
+- **`feat:`** - New feature or capability
+  - Example: `feat: render category filters from backend allowedCategories`
+
+- **`fix:`** - Bug fix
+  - Example: `fix: handle null keys in filter chip components`
+
+- **`refactor:`** - Code restructuring without changing behavior
+  - Example: `refactor: unify PWA filter state and query building`
+
+- **`docs:`** - Documentation changes only
+  - Example: `docs: add filter and release verification policy`
+
+- **`chore:`** - Maintenance tasks, dependencies, config
+  - Example: `chore: update dependencies`
+
+- **`style:`** - Code style changes (formatting, whitespace)
+  - Example: `style: format code with prettier`
+
+**Format:** `<type>: <brief description>`
+
+Keep descriptions concise but descriptive. If needed, add a body paragraph explaining the "why" for complex changes.
+
 ## 📖 Documentation
 
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture and data flow
