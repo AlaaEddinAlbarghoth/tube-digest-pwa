@@ -164,15 +164,41 @@ export function SettingsPage() {
                                 variant="danger"
                                 size="xs"
                                 onClick={async () => {
-                                    if (confirm('Reset app cache and reload? This will clear offline data.')) {
+                                    if (confirm('Reset app cache and reload? This will clear offline data and cached preferences.')) {
+                                        // Clear Service Workers
                                         if ('serviceWorker' in navigator) {
                                             const registrations = await navigator.serviceWorker.getRegistrations();
                                             for (const registration of registrations) {
                                                 await registration.unregister();
                                             }
                                         }
+                                        
+                                        // Clear Workbox caches
                                         const keys = await caches.keys();
                                         await Promise.all(keys.map(key => caches.delete(key)));
+                                        
+                                        // Clear localStorage (preferences and any other cached data)
+                                        localStorage.clear();
+                                        
+                                        // Clear IndexedDB if used (future-proofing)
+                                        if ('indexedDB' in window) {
+                                            try {
+                                                const databases = await indexedDB.databases();
+                                                await Promise.all(
+                                                    databases.map(db => {
+                                                        return new Promise<void>((resolve, reject) => {
+                                                            const deleteReq = indexedDB.deleteDatabase(db.name || '');
+                                                            deleteReq.onsuccess = () => resolve();
+                                                            deleteReq.onerror = () => reject(deleteReq.error);
+                                                            deleteReq.onblocked = () => resolve(); // Continue even if blocked
+                                                        });
+                                                    })
+                                                );
+                                            } catch (e) {
+                                                console.warn('Error clearing IndexedDB:', e);
+                                            }
+                                        }
+                                        
                                         window.location.reload();
                                     }
                                 }}

@@ -19,11 +19,13 @@ The main landing page showing recent videos with an intuitive digest-style inter
   - All
   - New (unread)
   - Read
+  - Processed (summarized)
 - **Priority Filter** - Filter by AI-assigned priority:
   - All
   - High (important topics)
   - Medium (worth watching)
   - Low (optional)
+- **Accurate Video Sorting** - Videos are sorted by Date+Time (newest first) with precise timestamp ordering
 - **Video Cards** - Each card shows:
   - Channel avatar (first letter)
   - Channel name
@@ -31,7 +33,7 @@ The main landing page showing recent videos with an intuitive digest-style inter
   - Time ago (relative date)
   - Duration
   - Priority badge (color-coded)
-  - NEW/READ status badge
+  - NEW/READ/PROCESSED status badge
   - Short summary excerpt (2-line max)
   - Quick action buttons: YouTube, Details
 
@@ -56,6 +58,7 @@ Full video archive with advanced filtering and search capabilities.
   - Status: All, New, Processed, Read
   - Priority: All, High, Medium, Low
   - Channel: Filter by specific channel
+- **Accurate Video Sorting** - Videos sorted by Date+Time (newest first) ensuring the most recent content appears at the top
 - **Sticky Filter Bar** - Filters remain visible while scrolling
 - **Load More** - Pagination for large result sets
 - **Empty State** - Helpful message when no videos match filters
@@ -178,6 +181,8 @@ User preferences and app configuration.
   - Processing schedule
   - Sheet ID (if applicable)
   - Connection status
+- **Cache Management**
+  - Reset App Cache button - Clears Service Worker, Workbox caches, localStorage, and IndexedDB for complete cache reset
 - **About Section**
   - App logo and name
   - Version number
@@ -252,6 +257,12 @@ User preferences and app configuration.
 - Settings shortcut
 
 ---
+
+## ✅ Recent Features
+
+- ✅ **Accurate Video Sorting** - Videos sorted by Date+Time (newest first) with precise timestamp ordering from Videos sheet
+- ✅ **Enhanced Status Filtering** - Supports PROCESSED status from Videos sheet with proper status mapping
+- ✅ **Complete Cache Reset** - Settings page includes comprehensive cache clearing (SW, Workbox, localStorage, IndexedDB)
 
 ## 🔮 Planned Features
 

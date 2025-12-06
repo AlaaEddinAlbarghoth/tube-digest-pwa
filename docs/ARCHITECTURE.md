@@ -129,6 +129,7 @@ POST {baseUrl}?action={actionName}  (with JSON body)
 - `priority`: `all` (default), `low`, `medium`, `high`
 - `channelId`: Filter by channel
 - `category`: Filter by category
+- **Sorting**: Videos are sorted by Date+Time from Videos sheet (newest first) for accurate chronological ordering
 
 **listChannels:**
 - `onlyWithNew`: `true`/`false` - Show only channels with new videos
@@ -418,3 +419,11 @@ The application is containerized using a multi-stage build:
 1. New SW detected
 2. User prompted to refresh
 3. Page reloads with new version
+
+### Cache Management
+- **Reset App Cache** feature in Settings clears:
+  - Service Worker registrations
+  - Workbox caches (all cache storage)
+  - localStorage (preferences and cached data)
+  - IndexedDB (future-proofing for any database usage)
+- Ensures users can get fresh data when needed
