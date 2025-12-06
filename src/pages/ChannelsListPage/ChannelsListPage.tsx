@@ -6,6 +6,7 @@ import { Toggle } from '@/components/shared/Toggle';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/shared/Button';
+import { bidiTextClass } from '@/utils/bidi';
 
 export function ChannelsListPage() {
     const {
@@ -68,7 +69,7 @@ export function ChannelsListPage() {
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg truncate rtl-text">
+                                        <h3 className={`font-semibold text-gray-900 dark:text-white text-lg truncate ${bidiTextClass(channel.name)}`}>
                                             {channel.name}
                                         </h3>
 

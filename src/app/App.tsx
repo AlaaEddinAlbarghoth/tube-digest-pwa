@@ -6,11 +6,11 @@ import { useSettingsStore } from '@/state/settingsStore';
 export function App() {
     const { preferences } = useSettingsStore();
 
-    // Set RTL direction and Arabic language for Arabic-first app
+    // Ensure default LTR layout (RTL is applied only at text level for Arabic content)
     useEffect(() => {
         const root = window.document.documentElement;
-        root.dir = 'rtl';
-        root.lang = 'ar';
+        root.dir = 'ltr';
+        // Do not set lang globally - let individual text elements handle their own language
     }, []);
 
     // Handle theme changes

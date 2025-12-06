@@ -4,6 +4,7 @@ import type { Priority } from '@/types/enums';
 import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { formatVideoDuration, capitalize } from '@/utils/formatters';
+import { bidiTextClass } from '@/utils/bidi';
 
 interface VideoCardProps {
     video: VideoSummary;
@@ -30,7 +31,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                 <div className="flex-1 min-w-0">
                     {/* Channel name and time */}
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate rtl-text">
+                        <span className={`font-medium text-gray-700 dark:text-gray-300 truncate ${bidiTextClass(video.channelName)}`}>
                             {video.channelName}
                         </span>
                         <span>•</span>
@@ -46,7 +47,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-1 leading-snug rtl-text">
+                    <h3 className={`font-semibold text-gray-900 dark:text-white line-clamp-2 mt-1 leading-snug ${bidiTextClass(video.title)}`}>
                         {video.title}
                     </h3>
                 </div>
@@ -66,7 +67,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                 )}
 
                 {video.category && (
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full rtl-text">
+                    <span className={`text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full ${bidiTextClass(video.category)}`}>
                         {video.category}
                     </span>
                 )}
@@ -75,7 +76,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
             {/* Excerpt */}
             {video.shortSummary && (
                 <div className="px-4 pt-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 rtl-text">
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 line-clamp-2 ${bidiTextClass(video.shortSummary)}`}>
                         {video.shortSummary}
                     </p>
                 </div>

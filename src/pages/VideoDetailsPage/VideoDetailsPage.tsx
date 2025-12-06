@@ -9,6 +9,7 @@ import { Toggle } from '@/components/shared/Toggle';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { formatDistanceToNow, format } from 'date-fns';
 import { formatVideoDuration, capitalize } from '@/utils/formatters';
+import { bidiTextClass, bidiPlainClass } from '@/utils/bidi';
 
 interface AccordionProps {
     title: string;
@@ -133,11 +134,11 @@ export function VideoDetailsPage() {
                     </Badge>
                     {video.status === 'new' && <Badge variant="info">NEW</Badge>}
                     {video.status === 'read' && <Badge variant="success">READ</Badge>}
-                    {video.category && <Badge variant="default"><span className="rtl-text">{video.category}</span></Badge>}
+                    {video.category && <Badge variant="default"><span className={bidiTextClass(video.category)}>{video.category}</span></Badge>}
                 </div>
 
                 {/* Title */}
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight rtl-text">
+                <h1 className={`text-xl font-bold text-gray-900 dark:text-white leading-tight ${bidiTextClass(video.title)}`}>
                     {video.title}
                 </h1>
 
@@ -147,7 +148,7 @@ export function VideoDetailsPage() {
                         {video.channelName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-200 rtl-text">{video.channelName}</p>
+                        <p className={`font-medium text-gray-900 dark:text-gray-200 ${bidiTextClass(video.channelName)}`}>{video.channelName}</p>
                         <p className="ltr-text">
                             {format(new Date(video.publishedAt), 'MMM d, yyyy')} • {formatDistanceToNow(new Date(video.publishedAt), { addSuffix: true })}
                         </p>
@@ -176,7 +177,7 @@ export function VideoDetailsPage() {
                 <div className="space-y-3">
                     {video.shortSummary && (
                         <Accordion title="📝 Short Summary" defaultOpen>
-                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap rtl-text">
+                            <p className={`text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${bidiPlainClass(video.shortSummary)}`}>
                                 {video.shortSummary}
                             </p>
                         </Accordion>
@@ -184,7 +185,7 @@ export function VideoDetailsPage() {
 
                     {video.mediumSummary && (
                         <Accordion title="📄 Medium Summary">
-                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap rtl-text">
+                            <p className={`text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${bidiPlainClass(video.mediumSummary)}`}>
                                 {video.mediumSummary}
                             </p>
                         </Accordion>
@@ -192,7 +193,7 @@ export function VideoDetailsPage() {
 
                     {video.fullSummary && (
                         <Accordion title="📚 Full Summary">
-                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap rtl-text">
+                            <p className={`text-gray-700 dark:text-gray-300 whitespace-pre-wrap ${bidiPlainClass(video.fullSummary)}`}>
                                 {video.fullSummary}
                             </p>
                         </Accordion>
@@ -200,11 +201,11 @@ export function VideoDetailsPage() {
 
                     {video.keyIdeas && video.keyIdeas.length > 0 && (
                         <Accordion title="💡 Key Ideas">
-                            <ul className="space-y-2 rtl-text">
+                            <ul className="space-y-2">
                                 {video.keyIdeas.map((idea, idx) => (
                                     <li key={idx} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                         <span className="text-blue-500 mt-0.5">•</span>
-                                        <span className="rtl-text">{idea}</span>
+                                        <span className={bidiPlainClass(idea)}>{idea}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -213,7 +214,7 @@ export function VideoDetailsPage() {
 
                     {mockActionItems.length > 0 && (
                         <Accordion title="✅ Action Items">
-                            <ul className="space-y-3 rtl-text">
+                            <ul className="space-y-3">
                                 {mockActionItems.map((item, idx) => (
                                     <li key={idx} className="flex items-start gap-3">
                                         <input
@@ -222,7 +223,7 @@ export function VideoDetailsPage() {
                                             onChange={(e) => setActionItems(prev => ({ ...prev, [idx]: e.target.checked }))}
                                             className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         />
-                                        <span className={`text-gray-700 dark:text-gray-300 rtl-text ${actionItems[idx] ? 'line-through opacity-60' : ''}`}>
+                                        <span className={`text-gray-700 dark:text-gray-300 ${bidiPlainClass(item)} ${actionItems[idx] ? 'line-through opacity-60' : ''}`}>
                                             {item}
                                         </span>
                                     </li>
