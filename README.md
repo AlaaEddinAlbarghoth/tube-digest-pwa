@@ -330,12 +330,49 @@ The following utility classes are available in `src/styles/globals.css`:
 - **Toggle**: Descriptions
 - **Settings**: All text content
 
+### BiDi Class Usage Rules
+
+**When to use `.rtl-text`:**
+- All Arabic summaries (short, medium, full, very long)
+- Video titles (may contain Arabic)
+- Channel names (may contain Arabic)
+- Category labels (Arabic)
+- Priority labels (if localized to Arabic)
+- Empty state messages (Arabic)
+- Description text (Arabic)
+- Key ideas and action items (Arabic)
+- Filter chips with Arabic labels (automatically detected by Chip component)
+
+**When to use `.ltr-text`:**
+- Date/time strings (English format: "MMM d, yyyy", "h:mm a", etc.)
+- URLs and YouTube video IDs
+- Code snippets or technical identifiers (Sheet IDs, build hashes)
+- Timestamps and relative time strings ("2 hours ago")
+- Numeric metadata values in English format
+
+**Automatic Detection:**
+- The `Chip` component automatically detects Arabic characters and applies `.rtl-text` when needed
+- This ensures category and priority filter chips render correctly without manual intervention
+
 ### Developer Notes
 
 - Always apply `.rtl-text` to Arabic content containers
 - Use `.ltr-text` for English-only metadata or technical values
 - Test with mixed Arabic/English content to ensure proper rendering
 - URLs and code-like tokens are automatically handled by the browser when using `unicode-bidi: plaintext`
+- The `Chip` component handles RTL automatically for Arabic labels
+
+### Known Edge Cases
+
+1. **Mixed Arabic/English in summaries**: The browser's `unicode-bidi: plaintext` handles inline English phrases automatically. No manual wrapping needed for most cases.
+
+2. **Date/time formatting**: All date/time strings use `.ltr-text` to ensure proper formatting regardless of document direction.
+
+3. **Filter chips**: The `Chip` component automatically detects Arabic and applies RTL, so category and priority filters work correctly.
+
+4. **Technical identifiers**: Sheet IDs, build hashes, and other code-like values always use `.ltr-text` to maintain readability.
+
+5. **Channel names with mixed content**: Channel names use `.rtl-text` as they are primarily Arabic, but embedded English will render correctly due to `unicode-bidi: plaintext`.
 
 ## 🔧 Engineering Workflow and Verification
 

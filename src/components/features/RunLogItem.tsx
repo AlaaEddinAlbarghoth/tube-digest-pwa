@@ -18,10 +18,10 @@ export function RunLogItem({ log }: RunLogItemProps) {
                 {/* Date and Time */}
                 <div>
                     <p className="font-semibold text-gray-900 dark:text-white">
-                        {format(new Date(log.startedAt), 'MMM d, yyyy')}
+                        <span className="ltr-text">{format(new Date(log.startedAt), 'MMM d, yyyy')}</span>
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {format(new Date(log.startedAt), 'h:mm a')}
+                        <span className="ltr-text">{format(new Date(log.startedAt), 'h:mm a')}</span>
                     </p>
                 </div>
 

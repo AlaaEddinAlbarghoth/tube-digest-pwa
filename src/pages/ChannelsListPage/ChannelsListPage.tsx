@@ -68,7 +68,7 @@ export function ChannelsListPage() {
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg truncate">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg truncate rtl-text">
                                             {channel.name}
                                         </h3>
 

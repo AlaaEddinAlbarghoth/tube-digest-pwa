@@ -60,7 +60,7 @@ export function ActivityLogsPage() {
                                 {lastRunSummary.status === 'success' ? '✓ Success' : lastRunSummary.status === 'error' ? '✗ Failed' : '⏳ Running'}
                             </Badge>
                         </div>
-                        <p className="text-2xl font-bold">
+                        <p className="text-2xl font-bold ltr-text">
                             {formatDistanceToNow(new Date(lastRunSummary.startedAt), { addSuffix: true })}
                         </p>
                     </div>

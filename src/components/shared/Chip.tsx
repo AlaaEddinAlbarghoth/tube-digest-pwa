@@ -9,6 +9,9 @@ interface ChipProps {
 }
 
 export function Chip({ label, isActive, onClick, onRemove, className }: ChipProps) {
+    // Determine if label is Arabic (contains Arabic characters)
+    const isArabic = /[\u0600-\u06FF]/.test(label);
+    
     return (
         <div
             className={clsx(
@@ -16,6 +19,7 @@ export function Chip({ label, isActive, onClick, onRemove, className }: ChipProp
                 isActive
                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-500/20'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
+                isArabic && 'rtl-text',
                 className
             )}
             onClick={onClick}

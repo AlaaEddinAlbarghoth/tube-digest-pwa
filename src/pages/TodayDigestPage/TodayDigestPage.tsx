@@ -182,7 +182,7 @@ export function TodayDigestPage() {
                             </span>
                             {backendInfo.lastSuccessfulRunAt && (
                                 <span className="text-gray-400 dark:text-gray-500">
-                                    Last run: {new Date(backendInfo.lastSuccessfulRunAt).toLocaleTimeString()}
+                                    Last run: <span className="ltr-text">{new Date(backendInfo.lastSuccessfulRunAt).toLocaleTimeString()}</span>
                                 </span>
                             )}
                         </div>

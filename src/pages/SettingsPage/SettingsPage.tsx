@@ -104,7 +104,7 @@ export function SettingsPage() {
                             {backendInfo.lastSuccessfulRunAt && (
                                 <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                     <span className="text-gray-500 dark:text-gray-400">Last Successful Run</span>
-                                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-white text-sm ltr-text">
                                         {new Date(backendInfo.lastSuccessfulRunAt).toLocaleString()}
                                     </span>
                                 </div>
@@ -134,7 +134,7 @@ export function SettingsPage() {
                                     {backendInfo.windowStatus3d.oldestNewTimestamp && (
                                         <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                             <span className="text-gray-500 dark:text-gray-400">Oldest NEW</span>
-                                            <span className="font-medium text-gray-900 dark:text-white text-xs">
+                                            <span className="font-medium text-gray-900 dark:text-white text-xs ltr-text">
                                                 {new Date(backendInfo.windowStatus3d.oldestNewTimestamp).toLocaleString()}
                                             </span>
                                         </div>
@@ -199,7 +199,7 @@ export function SettingsPage() {
                             {backendInfo.sheetId && (
                                 <div className="py-2">
                                     <span className="text-gray-500 dark:text-gray-400 block mb-1">Sheet ID</span>
-                                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all">
+                                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all ltr-text">
                                         {backendInfo.sheetId}
                                     </code>
                                 </div>
@@ -242,7 +242,7 @@ export function SettingsPage() {
                                 View on GitHub
                             </Button>
 
-                            <div className="text-xs text-gray-400 dark:text-gray-600 font-mono space-y-1">
+                            <div className="text-xs text-gray-400 dark:text-gray-600 font-mono space-y-1 ltr-text">
                                 <p>Build: {typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__.substring(0, 7) : 'dev'}</p>
                                 <p>Date: {typeof __BUILD_TIME__ !== 'undefined' ? new Date(__BUILD_TIME__).toLocaleString() : 'local'}</p>
                             </div>
