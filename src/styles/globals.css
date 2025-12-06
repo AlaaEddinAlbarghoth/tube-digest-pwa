@@ -45,3 +45,24 @@ body,
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* RTL and BiDi utilities for Arabic content */
+.rtl-text {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: plaintext;
+}
+
+.ltr-text {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+
+.bidi-plain {
+  unicode-bidi: plaintext;
+}
+
+.bidi-isolate {
+  unicode-bidi: isolate;
+}

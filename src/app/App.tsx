@@ -6,6 +6,13 @@ import { useSettingsStore } from '@/state/settingsStore';
 export function App() {
     const { preferences } = useSettingsStore();
 
+    // Set RTL direction and Arabic language for Arabic-first app
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.dir = 'rtl';
+        root.lang = 'ar';
+    }, []);
+
     // Handle theme changes
     useEffect(() => {
         const root = window.document.documentElement;

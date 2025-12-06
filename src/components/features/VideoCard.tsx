@@ -30,7 +30,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                 <div className="flex-1 min-w-0">
                     {/* Channel name and time */}
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
+                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate rtl-text">
                             {video.channelName}
                         </span>
                         <span>•</span>
@@ -46,7 +46,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-1 leading-snug">
+                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-1 leading-snug rtl-text">
                         {video.title}
                     </h3>
                 </div>
@@ -66,7 +66,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                 )}
 
                 {video.category && (
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full rtl-text">
                         {video.category}
                     </span>
                 )}
@@ -75,7 +75,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
             {/* Excerpt */}
             {video.shortSummary && (
                 <div className="px-4 pt-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 rtl-text">
                         {video.shortSummary}
                     </p>
                 </div>

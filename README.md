@@ -281,6 +281,62 @@ VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 
 ---
 
+## 🌐 RTL and BiDi Support
+
+The PWA is designed as an Arabic-first application with full RTL (Right-to-Left) support for proper rendering of Arabic content mixed with English text, URLs, and code.
+
+### RTL Configuration
+
+**App-Level Direction:**
+- The app sets `document.documentElement.dir = "rtl"` and `document.documentElement.lang = "ar"` on mount
+- This ensures the entire application renders in RTL mode by default
+
+**BiDi Utility Classes:**
+The following utility classes are available in `src/styles/globals.css`:
+
+- `.rtl-text` - Sets direction RTL, text-align right, and `unicode-bidi: plaintext` for Arabic content
+- `.ltr-text` - Sets direction LTR, text-align left, and `unicode-bidi: plaintext` for English/URLs/code
+- `.bidi-plain` - Applies `unicode-bidi: plaintext` for mixed content
+- `.bidi-isolate` - Applies `unicode-bidi: isolate` for isolated bidirectional text
+
+### RTL Application Guidelines
+
+**When to use `.rtl-text`:**
+- All Arabic summaries (short, medium, full, very long)
+- Video titles (may contain Arabic)
+- Channel names (may contain Arabic)
+- Category labels (Arabic)
+- Priority labels (if localized to Arabic)
+- Empty state messages (Arabic)
+- Description text (Arabic)
+- Key ideas and action items (Arabic)
+
+**When to use `.ltr-text`:**
+- Date/time strings (English format)
+- URLs and YouTube video IDs
+- Code snippets or technical identifiers
+- English-only metadata values
+
+**Mixed Content Handling:**
+- Use `unicode-bidi: plaintext` (via `.rtl-text` or `.bidi-plain`) for user-generated content that may contain mixed Arabic and English
+- The browser will automatically handle inline English phrases within Arabic paragraphs
+- For explicit LTR spans within RTL text, wrap with `<span dir="ltr" className="ltr-text">...</span>`
+
+### Components with RTL Support
+
+- **VideoCard**: Titles, summaries, channel names, categories
+- **VideoDetailsPage**: All summaries, key ideas, action items, titles, channel names
+- **EmptyState**: Descriptions
+- **Toggle**: Descriptions
+- **Settings**: All text content
+
+### Developer Notes
+
+- Always apply `.rtl-text` to Arabic content containers
+- Use `.ltr-text` for English-only metadata or technical values
+- Test with mixed Arabic/English content to ensure proper rendering
+- URLs and code-like tokens are automatically handled by the browser when using `unicode-bidi: plaintext`
+
 ## 🔧 Engineering Workflow and Verification
 
 ### Change-Set Definition

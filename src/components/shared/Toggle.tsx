@@ -19,7 +19,7 @@ export function Toggle({ checked, onChange, label, description, disabled }: Togg
                         </span>
                     )}
                     {description && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 rtl-text">
                             {description}
                         </span>
                     )}
