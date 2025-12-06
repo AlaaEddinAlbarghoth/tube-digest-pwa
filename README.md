@@ -2,6 +2,8 @@
 
 > **Your daily YouTube video summaries powered by AI** - A Progressive Web App that delivers AI-generated summaries of your YouTube subscriptions, helping you stay informed without watching every video.
 
+<!-- Test deployment trigger -->
+
 ## 🎯 What is TubeDigest?
 
 TubeDigest is a mobile-first PWA that connects to your YouTube Summarizer backend (Google Apps Script) to fetch and display AI-generated summaries of videos from your subscribed channels. Key features include:
