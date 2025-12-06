@@ -3,7 +3,6 @@ import { VideosApi } from '@/api/videosApi';
 import { ApiError } from '@/api/client';
 import type { VideoSummary } from '@/types/video';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
-import type { UnifiedFilters } from '@/types/filters';
 
 /**
  * Video filters state

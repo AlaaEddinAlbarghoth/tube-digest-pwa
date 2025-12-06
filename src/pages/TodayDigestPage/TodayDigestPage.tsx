@@ -68,9 +68,9 @@ export function TodayDigestPage() {
                 value: p as Priority
             }))
             : [
-                { label: 'High', value: 'high' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Low', value: 'low' }
+                { label: 'High', value: 'high' as Priority },
+                { label: 'Medium', value: 'medium' as Priority },
+                { label: 'Low', value: 'low' as Priority }
             ]) // Fallback to default if backend info not available
     ];
 

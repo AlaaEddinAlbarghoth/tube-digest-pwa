@@ -50,6 +50,9 @@ export function VideosListPage() {
         { label: 'Read', value: 'read' },
     ];
 
+    // Get backend info for dynamic categories and priorities
+    const { backendInfo } = useSettingsStore();
+
     // Dynamic priorities from backend
     const priorities: { label: string; value: Priority | null }[] = [
         { label: 'All', value: null },
@@ -59,14 +62,11 @@ export function VideosListPage() {
                 value: p as Priority
             }))
             : [
-                { label: 'High', value: 'high' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Low', value: 'low' }
+                { label: 'High', value: 'high' as Priority },
+                { label: 'Medium', value: 'medium' as Priority },
+                { label: 'Low', value: 'low' as Priority }
             ]) // Fallback to default if backend info not available
     ];
-
-    // Get backend info for dynamic categories
-    const { backendInfo } = useSettingsStore();
     
     // Dynamic categories from backend
     const categories: { label: string; value: string | null }[] = [
