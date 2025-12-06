@@ -32,6 +32,14 @@ export function TodayDigestPage() {
         setFilters({ dateRange: activeTab as DateRangeKey });
     }, [activeTab, setFilters]);
 
+    // Initialize dateRange from backendInfo when available
+    useEffect(() => {
+        if (backendInfo?.defaultRange && filters.dateRange !== backendInfo.defaultRange.replace('d', '') as DateRangeKey) {
+            const defaultRange = backendInfo.defaultRange.replace('d', '') as DateRangeKey;
+            setFilters({ dateRange: defaultRange });
+        }
+    }, [backendInfo?.defaultRange, setFilters]);
+
     useEffect(() => {
         fetchVideos();
         loadSettings();
@@ -45,15 +53,15 @@ export function TodayDigestPage() {
         { label: 'Today', value: 'today' },
     ];
 
-    const statuses: { label: string; value: 'all' | VideoStatus }[] = [
-        { label: 'All', value: 'all' },
+    const statuses: { label: string; value: VideoStatus | null }[] = [
+        { label: 'All', value: null },
         { label: 'New', value: 'new' },
         { label: 'Read', value: 'read' },
     ];
 
     // Dynamic priorities from backend
-    const priorities: { label: string; value: 'all' | Priority }[] = [
-        { label: 'All', value: 'all' },
+    const priorities: { label: string; value: Priority | null }[] = [
+        { label: 'All', value: null },
         ...(backendInfo?.allowedPriorities && backendInfo.allowedPriorities.length > 0
             ? backendInfo.allowedPriorities.map((p) => ({
                 label: p.charAt(0).toUpperCase() + p.slice(1), // Capitalize first letter
@@ -67,8 +75,8 @@ export function TodayDigestPage() {
     ];
 
     // Dynamic categories from backend
-    const categories: { label: string; value: 'all' | string }[] = [
-        { label: 'All', value: 'all' },
+    const categories: { label: string; value: string | null }[] = [
+        { label: 'All', value: null },
         ...(backendInfo?.allowedCategories && backendInfo.allowedCategories.length > 0
             ? backendInfo.allowedCategories.map((cat) => ({ label: cat, value: cat }))
             : [])

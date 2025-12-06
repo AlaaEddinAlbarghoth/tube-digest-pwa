@@ -87,6 +87,68 @@ tube-digest-pwa/
 
 ---
 
+## 🎛️ Filter Model
+
+The PWA uses a unified filter state model with consistent "All" semantics across all filter types.
+
+### Filter State Structure
+
+All filters use **null** to represent "All" (show everything), not a literal string:
+
+```typescript
+interface VideoFilters {
+    dateRange: DateRangeKey;      // Always required, never null
+    status: VideoStatus | null;    // null = All
+    priority: Priority | null;     // null = All
+    category: string | null;       // null = All
+    channelId: string | null;      // null = All
+    search: string;                // Empty string = no search
+}
+```
+
+### "All" Semantics
+
+- **null** means "don't filter by this field" - the filter is not sent to the API
+- Only non-null filter values are included in API queries
+- This ensures consistent behavior across all filter types (status, priority, category, channelId)
+
+### Default Derivation
+
+- **dateRange**: Defaults to `backendInfo.defaultRange` (e.g., "3d") when backend info loads, or falls back to "3d"
+- **status, priority, category, channelId**: Default to `null` (All)
+- **search**: Defaults to empty string
+
+### Filter Lifecycle
+
+1. **On Filter Change**:
+   - Current video list is cleared immediately
+   - Pagination is reset (currentPage = 0, hasMore = false)
+   - New fetch is triggered with updated filters
+   - This prevents stale data from previous filter states
+
+2. **Query Building**:
+   - Only non-null filters are included in API query
+   - `dateRange` is always included (required)
+   - Example: `{ range: "3d", priority: "high" }` (status, category, channelId are null, so not sent)
+
+3. **BackendInfo Dependency**:
+   - Filter options (category, priority) are rendered dynamically from `backendInfo.allowedCategories` and `backendInfo.allowedPriorities`
+   - If backendInfo is not loaded, filter sections show loading skeleton
+   - After load, filter options are populated from backend taxonomy
+
+### Store Actions
+
+The `videosStore` exposes these filter actions:
+
+- `setFilters(partial)` - Update multiple filters at once
+- `setDateRange(range)` - Set date range filter
+- `setStatus(status | null)` - Set status filter (null for All)
+- `setCategory(category | null)` - Set category filter (null for All)
+- `setPriority(priority | null)` - Set priority filter (null for All)
+- `resetFilters()` - Reset all filters to defaults
+
+All filter changes automatically trigger a refetch with cleared state to prevent stale data.
+
 ## 🛠️ Local Development
 
 ### Prerequisites
