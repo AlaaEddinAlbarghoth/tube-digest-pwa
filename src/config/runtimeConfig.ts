@@ -9,6 +9,7 @@
 
 export interface RuntimeConfig {
     backendBaseUrl: string;
+    apiToken?: string;
     appEnv: 'development' | 'staging' | 'production';
 }
 
@@ -32,6 +33,7 @@ export const getRuntimeConfig = (): RuntimeConfig => {
         window.__TUBEDIGEST_CONFIG__.backendBaseUrl.length > 0) {
         cachedConfig = {
             backendBaseUrl: window.__TUBEDIGEST_CONFIG__.backendBaseUrl,
+            apiToken: window.__TUBEDIGEST_CONFIG__.apiToken,
             appEnv: window.__TUBEDIGEST_CONFIG__.appEnv,
         };
         return cachedConfig;
@@ -40,6 +42,7 @@ export const getRuntimeConfig = (): RuntimeConfig => {
     // 2. Fallback to Vite env vars (Local Dev)
     cachedConfig = {
         backendBaseUrl: import.meta.env.VITE_BACKEND_URL || '',
+        apiToken: import.meta.env.VITE_API_TOKEN,
         appEnv: (import.meta.env.MODE as 'development' | 'staging' | 'production') || 'development',
     };
 
@@ -58,6 +61,13 @@ export const getRuntimeConfig = (): RuntimeConfig => {
  */
 export const getBackendBaseUrl = (): string => {
     return getRuntimeConfig().backendBaseUrl;
+};
+
+/**
+ * Get API token
+ */
+export const getApiToken = (): string | undefined => {
+    return getRuntimeConfig().apiToken;
 };
 
 /**

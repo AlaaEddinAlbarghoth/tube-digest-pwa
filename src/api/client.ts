@@ -1,4 +1,5 @@
 import { API_CONFIG } from '@/config/constants';
+import { getApiToken } from '@/config/runtimeConfig';
 
 /**
  * Custom error class for API errors
@@ -112,6 +113,12 @@ function buildUrl(action: string, params?: Record<string, string | number | bool
 
     const url = new URL(baseUrl);
     url.searchParams.set('action', action);
+
+    // Add API token if available
+    const apiToken = getApiToken();
+    if (apiToken) {
+        url.searchParams.set('apiToken', apiToken);
+    }
 
     if (params) {
         Object.entries(params).forEach(([key, value]) => {
