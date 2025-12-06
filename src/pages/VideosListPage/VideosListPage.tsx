@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useChannelsStore } from '@/state/channelsStore';
 import { useSettingsStore } from '@/state/settingsStore';
-import { useSettingsStore } from '@/state/settingsStore';
 import { VideoCard } from '@/components/features/VideoCard';
 import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
