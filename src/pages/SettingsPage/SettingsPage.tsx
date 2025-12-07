@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSettingsStore } from '@/state/settingsStore';
 import { Card } from '@/components/shared/Card';
 import { Toggle } from '@/components/shared/Toggle';
 import { Button } from '@/components/shared/Button';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { getBackendBaseUrl } from '@/config/runtimeConfig';
+import { VideosApi } from '@/api/videosApi';
 import type { ThemeMode } from '@/types/enums';
 
 export function SettingsPage() {
@@ -17,9 +18,28 @@ export function SettingsPage() {
         setTheme,
     } = useSettingsStore();
 
+    const [debugTitles, setDebugTitles] = useState<string[]>([]);
+    const [debugLoading, setDebugLoading] = useState(false);
+
     useEffect(() => {
         loadSettings();
     }, [loadSettings]);
+
+    // Dev-only: Fetch first 3 titles from API for debugging
+    const fetchDebugTitles = async () => {
+        if (!import.meta.env.DEV) return;
+        setDebugLoading(true);
+        try {
+            const videos = await VideosApi.getVideos({ range: '3d' });
+            const titles = videos.slice(0, 3).map(v => v.title);
+            setDebugTitles(titles);
+        } catch (error) {
+            console.error('[Settings Debug] Error fetching titles:', error);
+            setDebugTitles(['Error fetching titles']);
+        } finally {
+            setDebugLoading(false);
+        }
+    };
 
     const themeOptions: { label: string; value: ThemeMode; icon: string }[] = [
         { label: 'System', value: 'system', icon: '🖥️' },
@@ -197,6 +217,14 @@ export function SettingsPage() {
                                     {getBackendBaseUrl()}
                                 </code>
                             </div>
+                            {backendInfo.sheetId && (
+                                <div className="py-2 border-b border-gray-100 dark:border-gray-800">
+                                    <span className="text-gray-500 dark:text-gray-400 block mb-1">Sheet ID</span>
+                                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all ltr-text">
+                                        {backendInfo.sheetId}
+                                    </code>
+                                </div>
+                            )}
                             <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                 <span className="text-gray-500 dark:text-gray-400">API Version</span>
                                 <span className="font-medium text-gray-900 dark:text-white">{backendInfo.apiVersion || 'N/A'}</span>
@@ -205,12 +233,39 @@ export function SettingsPage() {
                                 <span className="text-gray-500 dark:text-gray-400">Schedule</span>
                                 <span className="font-medium text-gray-900 dark:text-white">{backendInfo.schedule || 'N/A'}</span>
                             </div>
-                            {backendInfo.sheetId && (
-                                <div className="py-2">
-                                    <span className="text-gray-500 dark:text-gray-400 block mb-1">Sheet ID</span>
-                                    <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all ltr-text">
-                                        {backendInfo.sheetId}
-                                    </code>
+                            {/* Dev-only debug section */}
+                            {import.meta.env.DEV && (
+                                <div className="py-2 border-t border-gray-200 dark:border-gray-700 mt-2">
+                                    <span className="text-gray-500 dark:text-gray-400 block mb-2 text-xs font-semibold">Debug (Dev Only)</span>
+                                    <div className="space-y-2">
+                                        <button
+                                            onClick={() => {
+                                                console.log('[Settings Debug] Backend Base URL:', getBackendBaseUrl());
+                                                console.log('[Settings Debug] Sheet ID:', backendInfo?.sheetId);
+                                                console.log('[Settings Debug] Full Backend Info:', backendInfo);
+                                            }}
+                                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline block"
+                                        >
+                                            Log Backend Info to Console
+                                        </button>
+                                        <button
+                                            onClick={fetchDebugTitles}
+                                            disabled={debugLoading}
+                                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline block disabled:opacity-50"
+                                        >
+                                            {debugLoading ? 'Loading...' : 'Show First 3 API Titles'}
+                                        </button>
+                                        {debugTitles.length > 0 && (
+                                            <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                                                <div className="font-semibold mb-1">First 3 titles from API:</div>
+                                                {debugTitles.map((title, idx) => (
+                                                    <div key={idx} className="text-gray-700 dark:text-gray-300 mb-1">
+                                                        {idx + 1}. {title.substring(0, 60)}{title.length > 60 ? '...' : ''}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
