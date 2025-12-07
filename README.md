@@ -349,6 +349,13 @@ Create a `.env` file with:
 VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 ```
 
+**Note:** The app works without `VITE_BACKEND_URL` - it uses a hardcoded fallback URL. Setting `VITE_BACKEND_URL` is optional and only needed if you want to use a different backend URL.
+
+**Backend Deployment (Optional):**
+- The app works with the existing Apps Script Web App deployment
+- Creating a new deployment is optional and only affects optional metadata fields in the Settings page
+- Core functionality (video listing, summaries) works without redeployment
+
 ---
 
 ## 📱 PWA Features

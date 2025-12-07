@@ -78,10 +78,17 @@ export const getRuntimeConfig = (): RuntimeConfig => {
     });
 
     // Runtime assert: backendBaseUrl must never be empty
+    // In production, log error but use fallback instead of crashing
     if (!cachedConfig.backendBaseUrl || cachedConfig.backendBaseUrl.length === 0) {
         const error = new Error('CRITICAL: backendBaseUrl is empty after resolution. This should never happen.');
         console.error('[RuntimeConfig]', error);
-        throw error;
+        // Use fallback in production to prevent crash
+        if (cachedConfig.appEnv === 'production') {
+            console.warn('[RuntimeConfig] Using fallback URL due to empty resolution in production');
+            cachedConfig.backendBaseUrl = FALLBACK_BACKEND_URL;
+        } else {
+            throw error;
+        }
     }
 
     return cachedConfig;

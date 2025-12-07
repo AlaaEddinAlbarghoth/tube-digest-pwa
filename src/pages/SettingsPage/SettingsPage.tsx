@@ -143,7 +143,7 @@ export function SettingsPage() {
                                 </>
                             ) : (
                                 <div className="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
-                                    Window status unavailable (backend may need redeployment)
+                                    بعض معلومات الخادم غير متاحة حالياً.
                                 </div>
                             )}
                             <div className="flex items-center justify-between py-2">
