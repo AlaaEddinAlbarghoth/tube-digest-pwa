@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useSettingsStore } from '@/state/settingsStore';
@@ -7,6 +7,7 @@ import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/shared/Button';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
 
 type TabValue = 'today' | '3d' | '7d';
@@ -20,12 +21,24 @@ export function TodayDigestPage() {
         error,
         filters,
         fetchVideos,
-        setFilters
+        setFilters,
+        lastUpdated
     } = useVideosStore();
 
     const { backendInfo, loadSettings } = useSettingsStore();
 
     const [activeTab, setActiveTab] = useState<TabValue>('7d');
+
+    // Auto-refresh callback - preserves list and uses abort signal
+    const refreshVideos = useCallback(
+        (signal: AbortSignal) => {
+            return fetchVideos(signal, true); // preserveList = true
+        },
+        [fetchVideos]
+    );
+
+    // Enable auto-refresh when page is mounted and visible
+    useAutoRefresh(refreshVideos, true);
 
     // Sync tab with dateRange filter
     useEffect(() => {
@@ -173,6 +186,13 @@ export function TodayDigestPage() {
 
             {/* Video List */}
             <div className="flex-1 overflow-y-auto p-4">
+                {/* Last Updated Indicator */}
+                {lastUpdated && (
+                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                )}
+
                 {/* Freshness Hint */}
                 {backendInfo?.windowStatus3d && (
                     <div className="mb-3 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useChannelsStore } from '@/state/channelsStore';
@@ -8,6 +8,7 @@ import { Chip } from '@/components/shared/Chip';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/shared/Button';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
 
 export function VideosListPage() {
@@ -21,7 +22,8 @@ export function VideosListPage() {
         hasMore,
         fetchVideos,
         fetchNextPage,
-        setFilters
+        setFilters,
+        lastUpdated
     } = useVideosStore();
 
     const { channels, channelIds, fetchChannels } = useChannelsStore();
@@ -32,6 +34,17 @@ export function VideosListPage() {
         fetchVideos();
         fetchChannels();
     }, [fetchVideos, fetchChannels]);
+
+    // Auto-refresh callback - preserves list and uses abort signal
+    const refreshVideos = useCallback(
+        (signal: AbortSignal) => {
+            return fetchVideos(signal, true); // preserveList = true
+        },
+        [fetchVideos]
+    );
+
+    // Enable auto-refresh when page is mounted and visible
+    useAutoRefresh(refreshVideos, true);
 
     const filteredVideos = videoIds.map(id => videos[id]);
 
@@ -171,6 +184,13 @@ export function VideosListPage() {
 
             {/* Video List */}
             <div className="flex-1 overflow-y-auto p-4">
+                {/* Last Updated Indicator */}
+                {lastUpdated && (
+                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                )}
+
                 {loading && filteredVideos.length === 0 ? (
                     <div className="flex justify-center py-12">
                         <LoadingSpinner size="lg" />

@@ -47,5 +47,47 @@ export function App() {
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, [preferences.theme]);
 
+    // Force SW update check on app start
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                registrations.forEach((registration) => {
+                    // Check for updates
+                    registration.update().catch(() => {
+                        // Ignore errors (SW might not be ready)
+                    });
+
+                    // Listen for new SW waiting
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New SW is waiting, do a soft reload when app is idle
+                                    // Use requestIdleCallback if available, otherwise setTimeout
+                                    const reloadWhenIdle = () => {
+                                        if (document.visibilityState === 'visible') {
+                                            // Only reload if tab is visible and app seems idle
+                                            // Wait a bit to avoid reload loops
+                                            setTimeout(() => {
+                                                window.location.reload();
+                                            }, 2000);
+                                        }
+                                    };
+
+                                    if ('requestIdleCallback' in window) {
+                                        requestIdleCallback(reloadWhenIdle, { timeout: 5000 });
+                                    } else {
+                                        setTimeout(reloadWhenIdle, 3000);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        }
+    }, []);
+
     return <RouterProvider router={router} />;
 }

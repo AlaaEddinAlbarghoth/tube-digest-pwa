@@ -42,12 +42,14 @@ export const VideosApi = {
      * Fetch list of videos with optional filters
      * 
      * @param params - Query parameters including date range and filters
+     * @param signal - Optional AbortSignal to cancel the request
      * @returns Array of video summaries
      */
-    async getVideos(params: VideosQuery): Promise<VideoSummary[]> {
+    async getVideos(params: VideosQuery, signal?: AbortSignal): Promise<VideoSummary[]> {
         const response = await get<ListVideosResponse>(
             'listVideos',
-            params as unknown as Record<string, string>
+            params as unknown as Record<string, string>,
+            signal
         );
         return response.videos;
     },

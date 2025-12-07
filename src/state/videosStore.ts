@@ -29,9 +29,10 @@ interface VideosState {
     filters: VideoFilters;
     hasMore: boolean;
     currentPage: number;
+    lastUpdated: Date | null; // Timestamp of last successful fetch
 
     // Actions
-    fetchVideos: () => Promise<void>;
+    fetchVideos: (signal?: AbortSignal, preserveList?: boolean) => Promise<void>;
     fetchNextPage: () => Promise<void>;
     setFilters: (partial: Partial<VideoFilters>) => void;
     setDateRange: (range: DateRangeKey) => void;
@@ -77,23 +78,30 @@ export const useVideosStore = create<VideosState>((set, get) => ({
     filters: getDefaultFilters(), // Will be updated when backendInfo loads
     hasMore: false,
     currentPage: 0,
+    lastUpdated: null,
 
     /**
      * Fetch videos based on current filters
-     * Clears existing list and resets pagination before fetching
+     * @param signal Optional AbortSignal to cancel the request
+     * @param preserveList If true, don't clear existing list (for auto-refresh)
      */
-    fetchVideos: async () => {
+    fetchVideos: async (signal?: AbortSignal, preserveList = false) => {
         const { filters } = get();
 
-        // Clear existing data and reset pagination
-        set({ 
-            loading: true, 
-            error: null, 
-            currentPage: 0,
-            videos: {},
-            videoIds: [],
-            hasMore: false
-        });
+        // Only clear list if not preserving (i.e., initial load or filter change)
+        if (!preserveList) {
+            set({ 
+                loading: true, 
+                error: null, 
+                currentPage: 0,
+                videos: {},
+                videoIds: [],
+                hasMore: false
+            });
+        } else {
+            // For auto-refresh, just set loading without clearing
+            set({ loading: true, error: null });
+        }
 
         try {
             // Build query - only include non-null filters
@@ -114,7 +122,7 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 query.category = filters.category;
             }
 
-            const videos = await VideosApi.getVideos(query);
+            const videos = await VideosApi.getVideos(query, signal);
 
             // Filter by search locally if needed
             let filteredVideos = videos;
@@ -143,8 +151,13 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 loading: false,
                 hasMore: false, // Backend doesn't support pagination yet
                 currentPage: 1,
+                lastUpdated: new Date(),
             });
         } catch (error) {
+            // Don't set error if request was aborted
+            if (error instanceof ApiError && error.code === 'ABORTED') {
+                return;
+            }
             const message = error instanceof ApiError ? error.getUserMessage() : (error as Error).message;
             set({
                 error: message,

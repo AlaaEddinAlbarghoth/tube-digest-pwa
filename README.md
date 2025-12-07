@@ -363,7 +363,20 @@ VITE_BACKEND_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 - **Installable** - Add to home screen on Android, iOS, and desktop
 - **Offline-ready** - Service worker caches app shell
 - **Auto-updates** - Prompts user when new version is available
+- **Auto-refresh** - Video lists automatically refresh every 90 seconds (with jitter) when page is visible
 - **Responsive** - Mobile-first design with bottom navigation
+
+### Auto-Refresh Behavior
+
+The app automatically refreshes video lists on the **Today Digest** and **Videos List** pages to ensure users always see the latest content:
+
+- **Polling Interval:** 90 seconds (with ±10 seconds jitter to avoid synchronized bursts)
+- **Visibility-Aware:** Polling stops when the browser tab is hidden and resumes when visible
+- **Non-Intrusive:** Auto-refresh preserves the current list and scroll position, only updating when new videos are available
+- **Request Cancellation:** In-flight requests are automatically cancelled if a new refresh cycle starts
+- **Last Updated Indicator:** Shows "آخر تحديث: HH:MM" (Last updated: HH:MM) at the top of video lists
+
+This ensures zero manual work is required - new videos appear automatically without user intervention.
 
 ---
 

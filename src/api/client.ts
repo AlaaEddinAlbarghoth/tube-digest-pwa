@@ -142,10 +142,12 @@ function buildUrl(action: string, params?: Record<string, string | number | bool
 
 /**
  * HTTP GET request
+ * @param signal Optional AbortSignal to cancel the request
  */
 export async function get<T>(
     action: string,
-    params?: Record<string, string | number | boolean | undefined>
+    params?: Record<string, string | number | boolean | undefined>,
+    signal?: AbortSignal
 ): Promise<T> {
     const url = buildUrl(action, params);
 
@@ -156,10 +158,15 @@ export async function get<T>(
                 'Accept': 'application/json',
             },
             cache: 'no-store',
+            signal,
         });
 
         return handleResponse<T>(response);
     } catch (error) {
+        // Handle abort
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new ApiError('Request aborted', undefined, 'ABORTED');
+        }
         // Re-throw ApiError as-is
         if (error instanceof ApiError) {
             throw error;
