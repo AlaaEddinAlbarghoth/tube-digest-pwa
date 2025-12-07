@@ -4,6 +4,7 @@ import { Card } from '@/components/shared/Card';
 import { Toggle } from '@/components/shared/Toggle';
 import { Button } from '@/components/shared/Button';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { getBackendBaseUrl } from '@/config/runtimeConfig';
 import type { ThemeMode } from '@/types/enums';
 
 export function SettingsPage() {
@@ -115,20 +116,20 @@ export function SettingsPage() {
                                     <span className="font-medium text-gray-900 dark:text-white">{backendInfo.videosWindowDays}d</span>
                                 </div>
                             )}
-                            {backendInfo.windowStatus3d && (
+                            {backendInfo.windowStatus3d ? (
                                 <>
                                     <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                         <span className="text-gray-500 dark:text-gray-400">Total in Window</span>
-                                        <span className="font-medium text-gray-900 dark:text-white">{backendInfo.windowStatus3d.totalInWindow}</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">{backendInfo.windowStatus3d.totalInWindow ?? 0}</span>
                                     </div>
                                     <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                         <span className="text-gray-500 dark:text-gray-400">Processed</span>
-                                        <span className="font-medium text-green-600 dark:text-green-400">{backendInfo.windowStatus3d.processedInWindow}</span>
+                                        <span className="font-medium text-green-600 dark:text-green-400">{backendInfo.windowStatus3d.processedInWindow ?? 0}</span>
                                     </div>
                                     <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                         <span className="text-gray-500 dark:text-gray-400">New</span>
-                                        <span className={`font-medium ${backendInfo.windowStatus3d.newInWindow > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'}`}>
-                                            {backendInfo.windowStatus3d.newInWindow}
+                                        <span className={`font-medium ${(backendInfo.windowStatus3d.newInWindow ?? 0) > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'}`}>
+                                            {backendInfo.windowStatus3d.newInWindow ?? 0}
                                         </span>
                                     </div>
                                     {backendInfo.windowStatus3d.oldestNewTimestamp && (
@@ -140,13 +141,15 @@ export function SettingsPage() {
                                         </div>
                                     )}
                                 </>
-                            )}
-                            {backendInfo.maxSummariesPerRun && (
-                                <div className="flex items-center justify-between py-2">
-                                    <span className="text-gray-500 dark:text-gray-400">Max Summaries/Run</span>
-                                    <span className="font-medium text-gray-900 dark:text-white">{backendInfo.maxSummariesPerRun}</span>
+                            ) : (
+                                <div className="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+                                    Window status unavailable (backend may need redeployment)
                                 </div>
                             )}
+                            <div className="flex items-center justify-between py-2">
+                                <span className="text-gray-500 dark:text-gray-400">Max Summaries/Run</span>
+                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.maxSummariesPerRun ?? 'N/A'}</span>
+                            </div>
                             <div className="pt-2">
                                 <Button
                                     variant="outline"
@@ -188,13 +191,19 @@ export function SettingsPage() {
                         </div>
                     ) : backendInfo ? (
                         <div className="space-y-4">
+                            <div className="py-2">
+                                <span className="text-gray-500 dark:text-gray-400 block mb-1">Backend Base URL</span>
+                                <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all ltr-text">
+                                    {getBackendBaseUrl()}
+                                </code>
+                            </div>
                             <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                 <span className="text-gray-500 dark:text-gray-400">API Version</span>
-                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.apiVersion}</span>
+                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.apiVersion || 'N/A'}</span>
                             </div>
                             <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                                 <span className="text-gray-500 dark:text-gray-400">Schedule</span>
-                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.schedule}</span>
+                                <span className="font-medium text-gray-900 dark:text-white">{backendInfo.schedule || 'N/A'}</span>
                             </div>
                             {backendInfo.sheetId && (
                                 <div className="py-2">
@@ -208,6 +217,12 @@ export function SettingsPage() {
                     ) : (
                         <div className="text-center py-4">
                             <p className="text-gray-500 dark:text-gray-400 mb-3">Backend info unavailable</p>
+                            <div className="py-2 mb-3">
+                                <span className="text-gray-500 dark:text-gray-400 block mb-1 text-xs">Backend Base URL (fallback)</span>
+                                <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono text-gray-700 dark:text-gray-300 break-all ltr-text">
+                                    {getBackendBaseUrl()}
+                                </code>
+                            </div>
                             <Button variant="outline" size="sm" onClick={loadSettings}>
                                 Retry
                             </Button>

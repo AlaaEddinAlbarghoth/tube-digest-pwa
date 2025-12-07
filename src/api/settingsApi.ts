@@ -23,9 +23,10 @@ export interface BackendInfo {
     videosWindowDays?: number;
     maxSummariesPerRun?: number;
     lastSuccessfulRunAt?: string | null;
+    hasLastSuccessfulRunAt?: boolean; // Indicates if lastSuccessfulRunAt property exists
     windowStatus3d?: WindowStatus3d | null;
-    allowedCategories?: string[]; // Controlled category taxonomy (Arabic)
-    allowedPriorities?: string[]; // Controlled priority taxonomy
+    allowedCategories?: string[]; // Controlled category taxonomy (Arabic) - always array if present
+    allowedPriorities?: string[]; // Controlled priority taxonomy - always array if present
 }
 
 /**
