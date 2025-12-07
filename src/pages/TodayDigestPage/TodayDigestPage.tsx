@@ -186,12 +186,15 @@ export function TodayDigestPage() {
 
             {/* Video List */}
             <div className="flex-1 overflow-y-auto p-4">
-                {/* Last Updated Indicator */}
-                {lastUpdated && (
-                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                        آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                )}
+                {/* Last Updated Indicator - Always visible */}
+                <div className="mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                    آخر تحديث: <span className="ltr-text font-medium">
+                        {lastUpdated 
+                            ? lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                            : '--:--'
+                        }
+                    </span>
+                </div>
 
                 {/* Freshness Hint */}
                 {backendInfo?.windowStatus3d && (

@@ -5,7 +5,7 @@ import path from 'path';
 
 export default defineConfig({
   define: {
-    '__GIT_SHA__': JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA || 'dev'),
+    '__GIT_SHA__': JSON.stringify(process.env.VITE_GIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'dev'),
     '__BUILD_TIME__': JSON.stringify(new Date().toISOString()),
   },
   plugins: [
