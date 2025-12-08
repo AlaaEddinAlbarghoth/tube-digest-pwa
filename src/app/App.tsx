@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { useSettingsStore } from '@/state/settingsStore';
+import { runBuildSelfHeal } from '@/utils/buildSelfHeal';
 
 export function App() {
     const { preferences } = useSettingsStore();
@@ -87,6 +88,13 @@ export function App() {
                 });
             });
         }
+    }, []);
+
+    // Cache self-heal on build change (production-safe, no UI prompt)
+    useEffect(() => {
+        runBuildSelfHeal().catch(() => {
+            // Silent failure
+        });
     }, []);
 
     return <RouterProvider router={router} />;

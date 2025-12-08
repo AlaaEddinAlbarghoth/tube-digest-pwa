@@ -23,8 +23,7 @@ export function TodayDigestPage() {
         fetchVideos,
         setFilters,
         lastUpdated,
-        totalMatching,
-        totalLoaded
+        totalMatching
     } = useVideosStore();
 
     const { backendInfo, loadSettings } = useSettingsStore();
@@ -142,9 +141,9 @@ export function TodayDigestPage() {
 
             {/* Filters */}
             <div className="sticky top-[49px] z-10 bg-gray-50 dark:bg-gray-950 py-3 border-b border-gray-200 dark:border-gray-800">
-                {/* Loaded count indicator */}
+                {/* Loaded count indicator (Arabic) */}
                 <div className="px-4 mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                    Loaded {totalLoaded} of {totalMatching !== null ? totalMatching : '--'}
+                    المعروض الآن: {videoIds.length} . إجمالي المطابقة من الخادم: {totalMatching !== null ? totalMatching : '--'}
                 </div>
                 <div className="px-4 space-y-2">
                     {/* Status filters */}

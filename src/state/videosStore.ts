@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { VideosApi } from '@/api/videosApi';
+import type { NewestVideoInfo } from '@/api/videosApi';
 import { ApiError } from '@/api/client';
 import type { VideoSummary } from '@/types/video';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
@@ -32,6 +33,7 @@ interface VideosState {
     lastUpdated: Date | null; // Timestamp of last successful fetch
     totalMatching: number | null; // Total count of videos matching filters (from API)
     totalLoaded: number; // Current count of videos loaded in store
+    newestVideo: NewestVideoInfo | null;
 
     // Actions
     fetchVideos: (signal?: AbortSignal, preserveList?: boolean) => Promise<void>;
@@ -83,6 +85,7 @@ export const useVideosStore = create<VideosState>((set, get) => ({
     lastUpdated: null,
     totalMatching: null,
     totalLoaded: 0,
+    newestVideo: null,
 
     /**
      * Fetch videos based on current filters
@@ -154,8 +157,9 @@ export const useVideosStore = create<VideosState>((set, get) => ({
 
             // Extract counts from response (defensive: handle missing fields)
             const totalMatching = response.totalMatching ?? null;
-            const returnedCount = response.returnedCount ?? filteredVideos.length;
-            const totalLoaded = videoIds.length;
+            const returnedCount = response.returnedCount ?? filteredVideos.length ?? 0;
+            const totalLoaded = returnedCount ?? videoIds.length;
+            const newestVideo = response.newestVideo ?? null;
 
             // Defensive logging for pagination debugging
             if (import.meta.env.DEV) {
@@ -177,6 +181,7 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 lastUpdated: new Date(),
                 totalMatching: totalMatching, // Only update if provided
                 totalLoaded: totalLoaded,
+                newestVideo: newestVideo,
             });
         } catch (error) {
             // Don't set error if request was aborted

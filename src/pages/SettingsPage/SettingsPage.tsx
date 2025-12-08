@@ -23,10 +23,36 @@ export function SettingsPage() {
 
     const [debugTitles, setDebugTitles] = useState<string[]>([]);
     const [debugLoading, setDebugLoading] = useState(false);
+    const [snapshot, setSnapshot] = useState<{
+        totalMatching: number | null;
+        returnedCount: number | null;
+        newestTitle: string | null;
+    }>({
+        totalMatching: null,
+        returnedCount: null,
+        newestTitle: null,
+    });
 
     useEffect(() => {
         loadSettings();
     }, [loadSettings]);
+
+    // Fetch a one-shot backend snapshot for range=7d
+    useEffect(() => {
+        const fetchSnapshot = async () => {
+            try {
+                const response = await VideosApi.getVideos({ range: '7d' }, undefined);
+                setSnapshot({
+                    totalMatching: response.totalMatching ?? null,
+                    returnedCount: response.returnedCount ?? null,
+                    newestTitle: response.newestVideo?.title ? response.newestVideo.title.substring(0, 80) : null,
+                });
+            } catch (err) {
+                // Silent fail; snapshot remains nulls
+            }
+        };
+        fetchSnapshot();
+    }, []);
 
     // Dev-only: Fetch first 3 titles from API for debugging
     const fetchDebugTitles = async () => {
@@ -198,6 +224,44 @@ export function SettingsPage() {
                             </Button>
                         </div>
                     )}
+                </Card>
+            </section>
+
+            {/* Backend Snapshot (production-visible) */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Backend Snapshot
+                </h2>
+                <Card className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Backend URL</span>
+                        <span className="text-xs font-mono ltr-text text-gray-700 dark:text-gray-300 max-w-[220px] truncate">{getBackendBaseUrl()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Build</span>
+                        <span className="text-xs font-mono ltr-text text-gray-700 dark:text-gray-300">
+                            {(() => {
+                                const sha = typeof __BUILD_SHA__ !== 'undefined' ? __BUILD_SHA__ :
+                                    (typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__ :
+                                        (import.meta.env.VITE_GIT_SHA || import.meta.env.VERCEL_GIT_COMMIT_SHA || 'unknown'));
+                                return sha && sha.length >= 7 ? sha.substring(0, 7) : sha;
+                            })()}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">totalMatching (7d)</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{snapshot.totalMatching ?? '--'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">returnedCount (7d)</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{snapshot.returnedCount ?? '--'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Newest title (7d)</span>
+                        <span className="text-xs text-gray-900 dark:text-white ltr-text truncate max-w-[220px]">
+                            {snapshot.newestTitle ?? '--'}
+                        </span>
+                    </div>
                 </Card>
             </section>
 
