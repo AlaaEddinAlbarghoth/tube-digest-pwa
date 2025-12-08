@@ -382,63 +382,98 @@ This ensures zero manual work is required - new videos appear automatically with
 
 ## 🎨 UI Enhancements
 
-The PWA includes several UX improvements for better usability and scalability:
+The PWA includes several UX improvements for better usability and scalability. These features were delivered in a combined commit (`9de4800`), and future enhancements should follow stepwise commits for better traceability.
 
 ### Search
 
-- **Local Search**: Search input filters videos locally over the already loaded list
-- **Search Fields**: Searches across `video.title` and `channel.name`
-- **Debouncing**: Input is debounced by 200ms to reduce unnecessary filtering
+**Behavior:**
+- **Local Search**: Search input filters videos locally over the already loaded list (does not trigger API calls)
+- **Search Fields**: Searches across `video.title` and `channel.name` (case-insensitive)
+- **Debouncing**: Input is debounced by 200ms to reduce unnecessary filtering operations
 - **Bilingual Support**: Search placeholder supports both Arabic and English text
 - **Persistent State**: Search term is stored in the videos store and persists across page navigation
+- **Performance**: Search filtering is memoized to avoid unnecessary re-computation on every render
+
+**Implementation Notes:**
+- Search is applied in the UI layer (pages), not in the store, keeping store data complete
+- Search works with both Arabic and English text using case-insensitive matching
+- Clearing search restores the full list immediately
 
 ### Sort Controls
 
-- **Sort Options**:
-  - **Newest first** (default) - Most recently published videos first
-  - **Oldest first** - Oldest videos first
-  - **Duration (longest)** - Longest videos first
-  - **Duration (shortest)** - Shortest videos first
-  - **Priority (High to Low)** - High priority videos first, then by date
-- **Stable Sorting**: Sorting preserves original order for items with equal values
-- **Local Sorting**: Sorting applies to the filtered local list (after search)
+**Sort Options:**
+- **Newest first** (default) - Most recently published videos first, sorted by `publishedAt` descending
+- **Oldest first** - Oldest videos first, sorted by `publishedAt` ascending
+- **Duration (longest)** - Longest videos first, sorted by `durationSeconds` descending
+- **Duration (shortest)** - Shortest videos first, sorted by `durationSeconds` ascending
+- **Priority (High to Low)** - High priority videos first, then by date (newest first) as secondary sort
+
+**Behavior:**
+- **Stable Sorting**: Sorting preserves original order for items with equal values (e.g., same published date)
+- **Local Sorting**: Sorting applies to the filtered local list (after search filter is applied)
+- **Performance**: Sorting is memoized and only re-computes when `videoIds`, `videos`, `filters.search`, or `filters.sort` change
 
 ### Filters Panel
 
-- **Reduced Clutter**: Priority and Category filters are moved into a collapsible "More Filters" panel
-- **Status Always Visible**: Status filters remain visible at all times for quick access
-- **Active Filter Indicator**: Shows a badge count when filters are active
-- **Reset Filters**: Quick "Reset Filters" button clears all active filters
-- **Responsive**: Layout remains clean on small screens with horizontal scrolling
+**Layout:**
+- **Status Always Visible**: Status filters (All, New, Read) remain visible at all times for quick access
+- **Collapsible Section**: Priority and Category filters are moved into a collapsible "More Filters" panel
+- **Active Filter Indicator**: Shows a badge count (e.g., "2") when Priority or Category filters are active
+- **Reset Filters**: Quick "Reset Filters" button appears when any filters are active, clears all filters to defaults
+
+**Behavior:**
+- Clicking "More Filters" toggles the collapsible section
+- Active filters are visually indicated with active chip styling
+- Reset button only appears when filters are active
+- Layout remains clean on small screens with horizontal scrolling for filter chips
 
 ### List Header Status
 
-- **Compact Count Display**: "Loaded X of Y" shown as a compact chip near filters
-- **Progress Indicator**: Subtle mini spinner appears while fetching
-- **Last Updated**: Shows "آخر تحديث: HH:MM" (Last updated: HH:MM) as secondary meta
-- **Consistent Alignment**: Status information aligned consistently across pages
+**Counts Chip:**
+- **Format**: "X / Y" where X is the number of videos currently displayed (after search/sort filtering) and Y is `totalMatching` from the backend API
+- **Meaning**: 
+  - X reflects the local filtered/sorted list count
+  - Y reflects the total count matching the backend filters (dateRange, status, priority, category, channelId) for the selected range
+  - If Y is "--", the backend did not provide `totalMatching` (graceful degradation)
+- **Progress Indicator**: Subtle mini spinner (3px border, blue) appears while `loading` is true
+- **Last Updated**: Shows "آخر تحديث: HH:MM" (Last updated: HH:MM) as secondary meta, aligned to the right
+- **Consistent Alignment**: Status information aligned consistently across Today Digest and Videos List pages
 
 ### Loading and Empty States
 
-- **Skeleton Cards**: Shows animated skeleton cards during initial load and filter changes
-- **Empty State Messages**: Clear messages when no results match filters or search
-  - Different messages for search vs. filter scenarios
-  - Action buttons to clear search or refresh
-- **Error States**: Retry button for network errors with clear error messages
+**Skeleton Cards:**
+- Shows 3 animated skeleton cards during initial load (`loading && filteredVideos.length === 0`)
+- Also appears during filter changes when the list is cleared
+- Skeleton matches the structure of `VideoCard` (avatar, title, badges, buttons)
+
+**Empty State Messages:**
+- **No Search Results**: "No results found" with message "No videos match '[search term]'. Try adjusting your search or filters." and "Clear Search" button
+- **No Filter Results**: "No videos found" with message "Try adjusting your filters or check back later for new summaries." and "Refresh" button
+- **Error State**: "Error loading videos" with error message and "Retry" button
 
 ### Desktop Master-Detail Layout
 
-- **Two-Column Layout**: On wide screens (≥1024px), implements a master-detail layout
-  - **Left Column**: Video list (scrollable)
-  - **Right Column**: Video preview panel (384px wide)
-- **Preview Panel**: Shows:
-  - Video title, channel name, published time
-  - Duration and badges (priority, status, category)
-  - Short summary and description (truncated)
-  - Action buttons (YouTube, Full Details)
-- **Selection**: Clicking a video card updates the preview without navigation
-- **Mobile Behavior**: On mobile (<1024px), maintains single-column layout with full navigation
-- **Visual Feedback**: Selected video card shows a blue ring indicator
+**Two-Column Layout:**
+- **Breakpoint**: Activates on screens ≥1024px (Tailwind `lg:` breakpoint)
+- **Left Column**: Video list (flexible width, scrollable)
+- **Right Column**: Video preview panel (fixed 384px width, `lg:w-96`)
+- **Border**: Vertical border between columns in light/dark mode
+
+**Preview Panel Behavior:**
+- **Selection**: Clicking a video card updates the preview panel without navigation
+- **Visual Feedback**: Selected video card shows a blue ring indicator (`ring-2 ring-blue-500`)
+- **Preview Content**: Shows video title, channel name, published time, duration, badges (priority, status, category), short summary, description (truncated to 6 lines), and action buttons
+- **Empty State**: When no video is selected, shows "👈 Select a video to preview" message
+
+**Mobile Behavior:**
+- On screens <1024px, maintains single-column layout
+- Clicking a video card navigates to the full details page (standard behavior)
+- Preview panel is hidden on mobile (`hidden lg:block`)
+
+**Auto-Refresh Compatibility:**
+- Auto-refresh uses `preserveList=true` to avoid clearing the list during background updates
+- Scroll position is preserved because the DOM elements remain (only data updates)
+- Selected video state persists across auto-refresh cycles
 
 ---
 
