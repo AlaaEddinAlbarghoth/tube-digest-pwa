@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSettingsStore } from '@/state/settingsStore';
+import { useVideosStore } from '@/state/videosStore';
 import { Card } from '@/components/shared/Card';
 import { Toggle } from '@/components/shared/Toggle';
 import { Button } from '@/components/shared/Button';
@@ -18,6 +19,8 @@ export function SettingsPage() {
         setTheme,
     } = useSettingsStore();
 
+    const { totalMatching, totalLoaded, videoIds } = useVideosStore();
+
     const [debugTitles, setDebugTitles] = useState<string[]>([]);
     const [debugLoading, setDebugLoading] = useState(false);
 
@@ -30,8 +33,8 @@ export function SettingsPage() {
         if (!import.meta.env.DEV) return;
         setDebugLoading(true);
         try {
-            const videos = await VideosApi.getVideos({ range: '3d' });
-            const titles = videos.slice(0, 3).map(v => v.title);
+            const response = await VideosApi.getVideos({ range: '3d' });
+            const titles = response.videos.slice(0, 3).map((v) => v.title);
             setDebugTitles(titles);
         } catch (error) {
             console.error('[Settings Debug] Error fetching titles:', error);
@@ -265,6 +268,18 @@ export function SettingsPage() {
                                                 ))}
                                             </div>
                                         )}
+                                        <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                                            <div className="font-semibold mb-1">Store Counts:</div>
+                                            <div className="text-gray-700 dark:text-gray-300">
+                                                totalMatching: {totalMatching !== null ? totalMatching : 'null'}
+                                            </div>
+                                            <div className="text-gray-700 dark:text-gray-300">
+                                                totalLoaded: {totalLoaded}
+                                            </div>
+                                            <div className="text-gray-700 dark:text-gray-300">
+                                                videoIds.length: {videoIds.length}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -313,7 +328,16 @@ export function SettingsPage() {
                             </Button>
 
                             <div className="text-xs text-gray-400 dark:text-gray-600 font-mono space-y-1 ltr-text">
-                                <p>Build: {typeof __GIT_SHA__ !== 'undefined' && __GIT_SHA__ !== 'dev' ? __GIT_SHA__.substring(0, 7) : (typeof __GIT_SHA__ !== 'undefined' ? __GIT_SHA__ : 'unknown')}</p>
+                                <p>Build: {(() => {
+                                    const buildSha = typeof __BUILD_SHA__ !== 'undefined' && __BUILD_SHA__ !== 'dev'
+                                        ? __BUILD_SHA__
+                                        : typeof __GIT_SHA__ !== 'undefined' && __GIT_SHA__ !== 'dev'
+                                            ? __GIT_SHA__
+                                            : 'unknown';
+                                    return buildSha !== 'unknown' && buildSha.length >= 7
+                                        ? buildSha.substring(0, 7)
+                                        : buildSha;
+                                })()}</p>
                                 <p>Date: {typeof __BUILD_TIME__ !== 'undefined' ? new Date(__BUILD_TIME__).toLocaleString() : 'local'}</p>
                             </div>
 

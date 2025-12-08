@@ -14,10 +14,23 @@ export interface VideosQuery {
 }
 
 /**
+ * Newest video info
+ */
+export interface NewestVideoInfo {
+    videoId: string;
+    title: string;
+    publishedAt: string | null;
+    source: 'Videos' | 'Summaries';
+}
+
+/**
  * Response from listVideos API
  */
-interface ListVideosResponse {
+export interface ListVideosResponse {
     videos: VideoSummary[];
+    totalMatching?: number; // Total count of videos matching filters
+    returnedCount?: number; // Number of items returned in this response
+    newestVideo?: NewestVideoInfo; // Newest video info (optional)
 }
 
 /**
@@ -43,15 +56,15 @@ export const VideosApi = {
      * 
      * @param params - Query parameters including date range and filters
      * @param signal - Optional AbortSignal to cancel the request
-     * @returns Array of video summaries
+     * @returns Full response with videos array and counts
      */
-    async getVideos(params: VideosQuery, signal?: AbortSignal): Promise<VideoSummary[]> {
+    async getVideos(params: VideosQuery, signal?: AbortSignal): Promise<ListVideosResponse> {
         const response = await get<ListVideosResponse>(
             'listVideos',
             params as unknown as Record<string, string>,
             signal
         );
-        return response.videos;
+        return response;
     },
 
     /**

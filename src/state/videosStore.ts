@@ -30,6 +30,8 @@ interface VideosState {
     hasMore: boolean;
     currentPage: number;
     lastUpdated: Date | null; // Timestamp of last successful fetch
+    totalMatching: number | null; // Total count of videos matching filters (from API)
+    totalLoaded: number; // Current count of videos loaded in store
 
     // Actions
     fetchVideos: (signal?: AbortSignal, preserveList?: boolean) => Promise<void>;
@@ -79,6 +81,8 @@ export const useVideosStore = create<VideosState>((set, get) => ({
     hasMore: false,
     currentPage: 0,
     lastUpdated: null,
+    totalMatching: null,
+    totalLoaded: 0,
 
     /**
      * Fetch videos based on current filters
@@ -96,7 +100,9 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 currentPage: 0,
                 videos: {},
                 videoIds: [],
-                hasMore: false
+                hasMore: false,
+                totalLoaded: 0
+                // Keep totalMatching until new response provides it
             });
         } else {
             // For auto-refresh, just set loading without clearing
@@ -122,7 +128,8 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 query.category = filters.category;
             }
 
-            const videos = await VideosApi.getVideos(query, signal);
+            const response = await VideosApi.getVideos(query, signal);
+            const videos = response.videos;
 
             // Filter by search locally if needed
             let filteredVideos = videos;
@@ -145,6 +152,22 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 videoIds.push(video.id);
             });
 
+            // Extract counts from response (defensive: handle missing fields)
+            const totalMatching = response.totalMatching ?? null;
+            const returnedCount = response.returnedCount ?? filteredVideos.length;
+            const totalLoaded = videoIds.length;
+
+            // Defensive logging for pagination debugging
+            if (import.meta.env.DEV) {
+                console.log('[VideosStore] fetchVideos:', {
+                    requestedPage: get().currentPage + 1,
+                    returnedCount,
+                    totalMatching,
+                    totalLoaded,
+                    hasMore: false // Backend doesn't support pagination yet
+                });
+            }
+
             set({
                 videos: videosMap,
                 videoIds,
@@ -152,6 +175,8 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 hasMore: false, // Backend doesn't support pagination yet
                 currentPage: 1,
                 lastUpdated: new Date(),
+                totalMatching: totalMatching, // Only update if provided
+                totalLoaded: totalLoaded,
             });
         } catch (error) {
             // Don't set error if request was aborted

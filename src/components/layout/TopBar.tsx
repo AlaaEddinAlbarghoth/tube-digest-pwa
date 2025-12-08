@@ -9,11 +9,15 @@ export function TopBar({ title }: TopBarProps) {
     const navigate = useNavigate();
 
     // Get build marker (short SHA or version)
-    const buildMarker = typeof __GIT_SHA__ !== 'undefined' && __GIT_SHA__ !== 'dev' 
-        ? __GIT_SHA__.substring(0, 7) 
-        : typeof __GIT_SHA__ !== 'undefined' 
-            ? __GIT_SHA__ 
+    // Prefer __BUILD_SHA__ (injected at build time), fallback to __GIT_SHA__
+    const buildSha = typeof __BUILD_SHA__ !== 'undefined' && __BUILD_SHA__ !== 'dev'
+        ? __BUILD_SHA__
+        : typeof __GIT_SHA__ !== 'undefined' && __GIT_SHA__ !== 'dev'
+            ? __GIT_SHA__
             : 'unknown';
+    const buildMarker = buildSha !== 'unknown' && buildSha.length >= 7
+        ? buildSha.substring(0, 7)
+        : buildSha;
 
     return (
         <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
