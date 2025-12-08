@@ -475,6 +475,26 @@ The PWA includes several UX improvements for better usability and scalability. T
 - Scroll position is preserved because the DOM elements remain (only data updates)
 - Selected video state persists across auto-refresh cycles
 
+### Additional UX Enhancements
+
+**Manual Refresh Button:**
+- Small refresh icon button appears next to the "Last updated" indicator on both Today Digest and Videos List pages
+- On click, triggers an immediate fetch using `preserveList=true` behavior (consistent with auto-refresh)
+- Shows a subtle loading spinner on the button while the request is in flight
+- Does not reset scroll position, maintaining user's place in the list
+
+**Sticky List Header:**
+- The filters area (status chips, counts line, search, sort controls) is sticky while scrolling
+- Uses `shadow-sm` for visual separation and proper z-index to avoid content overlap
+- Works correctly with RTL alignment and maintains consistent dark theme styling
+- No layout jump - background and borders ensure smooth scrolling experience
+
+**No Summary Badge:**
+- Videos without summaries (missing `shortSummary`, `mediumSummary`, and `fullSummary`) display a neutral badge: "بدون ملخص بعد"
+- Badge appears in the badges row alongside priority, status, and category badges
+- Automatically disappears when a summary becomes available
+- Uses neutral gray styling to indicate pending state without alarming the user
+
 ---
 
 ## 🎨 Design System

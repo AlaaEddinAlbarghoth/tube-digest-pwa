@@ -71,6 +71,13 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                         {video.category}
                     </span>
                 )}
+
+                {/* No summary badge */}
+                {!video.shortSummary && !video.mediumSummary && !video.fullSummary && (
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-500 rounded-full rtl-text">
+                        بدون ملخص بعد
+                    </span>
+                )}
             </div>
 
             {/* Excerpt */}

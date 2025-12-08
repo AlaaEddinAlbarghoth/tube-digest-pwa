@@ -191,8 +191,8 @@ export function TodayDigestPage() {
                 />
             </div>
 
-            {/* Filters */}
-            <div className="sticky top-[113px] z-10 bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+            {/* Filters - Sticky header area */}
+            <div className="sticky top-[113px] z-10 bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 shadow-sm">
                 {/* Loaded count indicator (Arabic) - compact chip */}
                 <div className="px-4 py-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -205,11 +205,28 @@ export function TodayDigestPage() {
                             <span>{totalMatching !== null ? totalMatching : '--'}</span>
                         </span>
                     </div>
-                    {lastUpdated && (
-                        <span className="text-xs text-gray-400 dark:text-gray-500">
-                            آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {lastUpdated && (
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                                آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </span>
+                        )}
+                        <button
+                            onClick={() => fetchVideos(undefined, true)}
+                            disabled={loading}
+                            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Refresh"
+                            aria-label="Refresh videos"
+                        >
+                            {loading ? (
+                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
                 
                 {/* Sort control */}
