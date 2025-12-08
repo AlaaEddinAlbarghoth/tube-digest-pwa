@@ -6,6 +6,11 @@ import type { VideoSummary } from '@/types/video';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
 
 /**
+ * Sort options for video lists
+ */
+export type SortOption = 'newest' | 'oldest' | 'duration-longest' | 'duration-shortest' | 'priority-high';
+
+/**
  * Video filters state
  * Uses null for "All" semantics - null means don't filter by this field
  */
@@ -16,6 +21,7 @@ interface VideoFilters {
     category: string | null; // null = All
     channelId: string | null; // null = All
     search: string; // Empty string = no search
+    sort: SortOption; // Sort option
 }
 
 /**
@@ -43,6 +49,7 @@ interface VideosState {
     setStatus: (status: VideoStatus | null) => void;
     setCategory: (category: string | null) => void;
     setPriority: (priority: Priority | null) => void;
+    setSort: (sort: SortOption) => void;
     resetFilters: () => void;
     markAsRead: (videoId: string) => Promise<void>;
     clearError: () => void;
@@ -65,6 +72,7 @@ const getDefaultFilters = (defaultRange?: string): VideoFilters => {
         category: null, // All
         channelId: null, // All
         search: '',
+        sort: 'newest', // Default: newest first
     };
 };
 
@@ -266,6 +274,13 @@ export const useVideosStore = create<VideosState>((set, get) => ({
      */
     setPriority: (priority: Priority | null) => {
         get().setFilters({ priority });
+    },
+
+    /**
+     * Set sort option
+     */
+    setSort: (sort: SortOption) => {
+        get().setFilters({ sort });
     },
 
     /**

@@ -3,12 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useSettingsStore } from '@/state/settingsStore';
 import { VideoCard } from '@/components/features/VideoCard';
+import { VideoPreview } from '@/components/features/VideoPreview';
 import { Chip } from '@/components/shared/Chip';
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { FiltersPanel } from '@/components/shared/FiltersPanel';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { VideoCardSkeleton } from '@/components/shared/VideoCardSkeleton';
 import { Button } from '@/components/shared/Button';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useDebounce } from '@/hooks/useDebounce';
+import { sortVideos } from '@/utils/sortVideos';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
+import type { VideoSummary } from '@/types/video';
 
 type TabValue = 'today' | '3d' | '7d';
 
@@ -22,6 +27,11 @@ export function TodayDigestPage() {
         filters,
         fetchVideos,
         setFilters,
+        setSort,
+        setStatus,
+        setPriority,
+        setCategory,
+        resetFilters,
         lastUpdated,
         totalMatching
     } = useVideosStore();
@@ -29,6 +39,23 @@ export function TodayDigestPage() {
     const { backendInfo, loadSettings } = useSettingsStore();
 
     const [activeTab, setActiveTab] = useState<TabValue>('7d');
+    const [searchInput, setSearchInput] = useState(filters.search);
+    const [selectedVideo, setSelectedVideo] = useState<VideoSummary | null>(null);
+    const debouncedSearch = useDebounce(searchInput, 200);
+
+    // Sync debounced search to store
+    useEffect(() => {
+        if (debouncedSearch !== filters.search) {
+            setFilters({ search: debouncedSearch });
+        }
+    }, [debouncedSearch, filters.search, setFilters]);
+
+    // Sync store search to input (for external changes)
+    useEffect(() => {
+        if (filters.search !== searchInput) {
+            setSearchInput(filters.search);
+        }
+    }, [filters.search]);
 
     // Auto-refresh callback - preserves list and uses abort signal
     const refreshVideos = useCallback(
@@ -59,7 +86,20 @@ export function TodayDigestPage() {
         loadSettings();
     }, [fetchVideos, loadSettings]);
 
-    const filteredVideos = videoIds.map(id => videos[id]);
+    // Filter and sort videos locally
+    const filteredVideos = sortVideos(
+        videoIds
+            .map(id => videos[id])
+            .filter((video) => {
+                if (!filters.search) return true;
+                const searchLower = filters.search.toLowerCase();
+                return (
+                    video.title.toLowerCase().includes(searchLower) ||
+                    video.channelName.toLowerCase().includes(searchLower)
+                );
+            }),
+        filters.sort
+    );
 
     const tabs: { label: string; value: TabValue }[] = [
         { label: '7 Days', value: '7d' },
@@ -139,68 +179,89 @@ export function TodayDigestPage() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="sticky top-[49px] z-10 bg-gray-50 dark:bg-gray-950 py-3 border-b border-gray-200 dark:border-gray-800">
-                {/* Loaded count indicator (Arabic) */}
-                <div className="px-4 mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                    المعروض الآن: {videoIds.length} . إجمالي المطابقة من الخادم: {totalMatching !== null ? totalMatching : '--'}
-                </div>
-                <div className="px-4 space-y-2">
-                    {/* Status filters */}
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Status:</span>
-                        {statuses.map((s) => (
-                            <Chip
-                                key={s.value ?? 'all'}
-                                label={s.label}
-                                isActive={filters.status === s.value}
-                                onClick={() => setFilters({ status: s.value })}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Priority filters */}
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Priority:</span>
-                        {priorities.map((p) => (
-                            <Chip
-                                key={p.value ?? 'all'}
-                                label={p.label}
-                                isActive={filters.priority === p.value}
-                                onClick={() => setFilters({ priority: p.value })}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Category filters */}
-                    {categories.length > 1 && (
-                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Category:</span>
-                            {categories.map((c) => (
-                                <Chip
-                                    key={c.value ?? 'all'}
-                                    label={c.label}
-                                    isActive={filters.category === c.value}
-                                    onClick={() => setFilters({ category: c.value })}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
+            {/* Search */}
+            <div className="sticky top-[49px] z-19 bg-gray-50 dark:bg-gray-950 p-4 border-b border-gray-200 dark:border-gray-800">
+                <input
+                    type="search"
+                    placeholder="ابحث في الفيديوهات... / Search videos..."
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                />
             </div>
 
-            {/* Video List */}
-            <div className="flex-1 overflow-y-auto p-4">
-                {/* Last Updated Indicator - Always visible */}
-                <div className="mb-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                    آخر تحديث: <span className="ltr-text font-medium">
-                        {lastUpdated 
-                            ? lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-                            : '--:--'
-                        }
-                    </span>
+            {/* Filters */}
+            <div className="sticky top-[113px] z-10 bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+                {/* Loaded count indicator (Arabic) - compact chip */}
+                <div className="px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        {loading && (
+                            <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        )}
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="font-medium text-gray-700 dark:text-gray-300">{filteredVideos.length}</span>
+                            {' / '}
+                            <span>{totalMatching !== null ? totalMatching : '--'}</span>
+                        </span>
+                    </div>
+                    {lastUpdated && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                            آخر تحديث: <span className="ltr-text font-medium">{lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </span>
+                    )}
+                </div>
+                
+                {/* Sort control */}
+                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Sort:</span>
+                        <Chip
+                            label="Newest"
+                            isActive={filters.sort === 'newest'}
+                            onClick={() => setSort('newest')}
+                        />
+                        <Chip
+                            label="Oldest"
+                            isActive={filters.sort === 'oldest'}
+                            onClick={() => setSort('oldest')}
+                        />
+                        <Chip
+                            label="Longest"
+                            isActive={filters.sort === 'duration-longest'}
+                            onClick={() => setSort('duration-longest')}
+                        />
+                        <Chip
+                            label="Shortest"
+                            isActive={filters.sort === 'duration-shortest'}
+                            onClick={() => setSort('duration-shortest')}
+                        />
+                        <Chip
+                            label="Priority"
+                            isActive={filters.sort === 'priority-high'}
+                            onClick={() => setSort('priority-high')}
+                        />
+                    </div>
                 </div>
 
+                {/* Filters Panel */}
+                <FiltersPanel
+                    statuses={statuses}
+                    priorities={priorities}
+                    categories={categories}
+                    activeStatus={filters.status}
+                    activePriority={filters.priority}
+                    activeCategory={filters.category}
+                    onStatusChange={setStatus}
+                    onPriorityChange={setPriority}
+                    onCategoryChange={setCategory}
+                    onReset={resetFilters}
+                />
+            </div>
+
+            {/* Video List - Desktop two-column layout */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* List Column */}
+                <div className="flex-1 overflow-y-auto p-4 lg:border-r lg:border-gray-200 lg:dark:border-gray-800">
                 {/* Freshness Hint */}
                 {backendInfo?.windowStatus3d && (
                     <div className="mb-3 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
@@ -218,32 +279,86 @@ export function TodayDigestPage() {
                 )}
 
                 {loading && filteredVideos.length === 0 ? (
-                    <div className="flex justify-center py-12">
-                        <LoadingSpinner size="lg" />
+                    <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                            <VideoCardSkeleton key={i} />
+                        ))}
                     </div>
+                ) : error ? (
+                    <EmptyState
+                        icon="⚠️"
+                        title="Error loading videos"
+                        description={error}
+                        action={
+                            <Button onClick={() => fetchVideos()} variant="primary">
+                                Retry
+                            </Button>
+                        }
+                    />
                 ) : filteredVideos.length > 0 ? (
                     <div className="space-y-4">
                         {filteredVideos.map((video) => (
-                            <VideoCard
+                            <div
                                 key={video.id}
-                                video={video}
-                                onOpenDetails={() => navigate(`/videos/${video.id}`)}
-                                onOpenYouTube={() => handleOpenYouTube(video.youtubeVideoId)}
-                            />
+                                onClick={() => setSelectedVideo(video)}
+                                className={`cursor-pointer transition-all ${
+                                    selectedVideo?.id === video.id
+                                        ? 'ring-2 ring-blue-500 rounded-xl'
+                                        : ''
+                                }`}
+                            >
+                                <VideoCard
+                                    video={video}
+                                    onOpenDetails={() => {
+                                        setSelectedVideo(video);
+                                        if (window.innerWidth < 1024) {
+                                            navigate(`/videos/${video.id}`);
+                                        }
+                                    }}
+                                    onOpenYouTube={() => handleOpenYouTube(video.youtubeVideoId)}
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
                     <EmptyState
-                        icon="📭"
-                        title="No videos found"
-                        description="Try adjusting your filters or check back later for new summaries."
+                        icon="🔍"
+                        title={filters.search ? "No results found" : "No videos found"}
+                        description={filters.search 
+                            ? `No videos match "${filters.search}". Try adjusting your search or filters.`
+                            : "Try adjusting your filters or check back later for new summaries."
+                        }
                         action={
-                            <Button onClick={() => fetchVideos()} variant="outline" size="sm">
-                                Refresh
-                            </Button>
+                            filters.search ? (
+                                <Button onClick={() => setFilters({ search: '' })} variant="outline" size="sm">
+                                    Clear Search
+                                </Button>
+                            ) : (
+                                <Button onClick={() => fetchVideos()} variant="outline" size="sm">
+                                    Refresh
+                                </Button>
+                            )
                         }
                     />
                 )}
+                </div>
+
+                {/* Preview Column - Desktop only */}
+                <div className="hidden lg:block lg:w-96 flex-shrink-0">
+                    <VideoPreview
+                        video={selectedVideo}
+                        onOpenDetails={() => {
+                            if (selectedVideo) {
+                                navigate(`/videos/${selectedVideo.id}`);
+                            }
+                        }}
+                        onOpenYouTube={() => {
+                            if (selectedVideo) {
+                                handleOpenYouTube(selectedVideo.youtubeVideoId);
+                            }
+                        }}
+                    />
+                </div>
             </div>
         </div>
     );
