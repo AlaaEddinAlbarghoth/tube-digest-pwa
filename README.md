@@ -380,6 +380,68 @@ This ensures zero manual work is required - new videos appear automatically with
 
 ---
 
+## 🎨 UI Enhancements
+
+The PWA includes several UX improvements for better usability and scalability:
+
+### Search
+
+- **Local Search**: Search input filters videos locally over the already loaded list
+- **Search Fields**: Searches across `video.title` and `channel.name`
+- **Debouncing**: Input is debounced by 200ms to reduce unnecessary filtering
+- **Bilingual Support**: Search placeholder supports both Arabic and English text
+- **Persistent State**: Search term is stored in the videos store and persists across page navigation
+
+### Sort Controls
+
+- **Sort Options**:
+  - **Newest first** (default) - Most recently published videos first
+  - **Oldest first** - Oldest videos first
+  - **Duration (longest)** - Longest videos first
+  - **Duration (shortest)** - Shortest videos first
+  - **Priority (High to Low)** - High priority videos first, then by date
+- **Stable Sorting**: Sorting preserves original order for items with equal values
+- **Local Sorting**: Sorting applies to the filtered local list (after search)
+
+### Filters Panel
+
+- **Reduced Clutter**: Priority and Category filters are moved into a collapsible "More Filters" panel
+- **Status Always Visible**: Status filters remain visible at all times for quick access
+- **Active Filter Indicator**: Shows a badge count when filters are active
+- **Reset Filters**: Quick "Reset Filters" button clears all active filters
+- **Responsive**: Layout remains clean on small screens with horizontal scrolling
+
+### List Header Status
+
+- **Compact Count Display**: "Loaded X of Y" shown as a compact chip near filters
+- **Progress Indicator**: Subtle mini spinner appears while fetching
+- **Last Updated**: Shows "آخر تحديث: HH:MM" (Last updated: HH:MM) as secondary meta
+- **Consistent Alignment**: Status information aligned consistently across pages
+
+### Loading and Empty States
+
+- **Skeleton Cards**: Shows animated skeleton cards during initial load and filter changes
+- **Empty State Messages**: Clear messages when no results match filters or search
+  - Different messages for search vs. filter scenarios
+  - Action buttons to clear search or refresh
+- **Error States**: Retry button for network errors with clear error messages
+
+### Desktop Master-Detail Layout
+
+- **Two-Column Layout**: On wide screens (≥1024px), implements a master-detail layout
+  - **Left Column**: Video list (scrollable)
+  - **Right Column**: Video preview panel (384px wide)
+- **Preview Panel**: Shows:
+  - Video title, channel name, published time
+  - Duration and badges (priority, status, category)
+  - Short summary and description (truncated)
+  - Action buttons (YouTube, Full Details)
+- **Selection**: Clicking a video card updates the preview without navigation
+- **Mobile Behavior**: On mobile (<1024px), maintains single-column layout with full navigation
+- **Visual Feedback**: Selected video card shows a blue ring indicator
+
+---
+
 ## 🎨 Design System
 
 | Token | Value |
