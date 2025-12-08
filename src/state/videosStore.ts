@@ -142,30 +142,20 @@ export const useVideosStore = create<VideosState>((set, get) => ({
             const response = await VideosApi.getVideos(query, signal);
             const videos = response.videos;
 
-            // Filter by search locally if needed
-            let filteredVideos = videos;
-            if (filters.search) {
-                const searchLower = filters.search.toLowerCase();
-                filteredVideos = videos.filter(
-                    (v) =>
-                        v.title.toLowerCase().includes(searchLower) ||
-                        v.channelName.toLowerCase().includes(searchLower) ||
-                        v.description?.toLowerCase().includes(searchLower)
-                );
-            }
-
+            // Note: Search filtering is done in the UI layer (pages), not here
+            // This keeps the store data complete and allows local-only search
             // Convert to map
             const videosMap: Record<string, VideoSummary> = {};
             const videoIds: string[] = [];
 
-            filteredVideos.forEach((video) => {
+            videos.forEach((video) => {
                 videosMap[video.id] = video;
                 videoIds.push(video.id);
             });
 
             // Extract counts from response (defensive: handle missing fields)
             const totalMatching = response.totalMatching ?? null;
-            const returnedCount = response.returnedCount ?? filteredVideos.length ?? 0;
+            const returnedCount = response.returnedCount ?? videos.length ?? 0;
             const totalLoaded = returnedCount ?? videoIds.length;
             const newestVideo = response.newestVideo ?? null;
 

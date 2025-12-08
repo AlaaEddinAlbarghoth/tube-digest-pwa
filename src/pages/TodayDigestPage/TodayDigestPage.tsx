@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useSettingsStore } from '@/state/settingsStore';
@@ -86,9 +86,10 @@ export function TodayDigestPage() {
         loadSettings();
     }, [fetchVideos, loadSettings]);
 
-    // Filter and sort videos locally
-    const filteredVideos = sortVideos(
-        videoIds
+    // Filter and sort videos locally - memoized to avoid unnecessary re-computation
+    // This is a single derived list that combines search filter and sort
+    const filteredVideos = useMemo(() => {
+        const videoList = videoIds
             .map(id => videos[id])
             .filter((video) => {
                 if (!filters.search) return true;
@@ -97,9 +98,9 @@ export function TodayDigestPage() {
                     video.title.toLowerCase().includes(searchLower) ||
                     video.channelName.toLowerCase().includes(searchLower)
                 );
-            }),
-        filters.sort
-    );
+            });
+        return sortVideos(videoList, filters.sort);
+    }, [videoIds, videos, filters.search, filters.sort]);
 
     const tabs: { label: string; value: TabValue }[] = [
         { label: '7 Days', value: '7d' },

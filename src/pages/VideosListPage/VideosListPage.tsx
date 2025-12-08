@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideosStore } from '@/state/videosStore';
 import { useChannelsStore } from '@/state/channelsStore';
@@ -75,9 +75,10 @@ export function VideosListPage() {
     // Enable auto-refresh when page is mounted and visible
     useAutoRefresh(refreshVideos, true);
 
-    // Filter and sort videos locally
-    const filteredVideos = sortVideos(
-        videoIds
+    // Filter and sort videos locally - memoized to avoid unnecessary re-computation
+    // This is a single derived list that combines search filter and sort
+    const filteredVideos = useMemo(() => {
+        const videoList = videoIds
             .map(id => videos[id])
             .filter((video) => {
                 if (!filters.search) return true;
@@ -86,9 +87,9 @@ export function VideosListPage() {
                     video.title.toLowerCase().includes(searchLower) ||
                     video.channelName.toLowerCase().includes(searchLower)
                 );
-            }),
-        filters.sort
-    );
+            });
+        return sortVideos(videoList, filters.sort);
+    }, [videoIds, videos, filters.search, filters.sort]);
 
     const dateRanges: { label: string; value: DateRangeKey }[] = [
         { label: 'Today', value: 'today' },
