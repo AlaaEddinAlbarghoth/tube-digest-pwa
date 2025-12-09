@@ -4,6 +4,7 @@ import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { formatVideoDuration, capitalize } from '@/utils/formatters';
 import { bidiTextClass } from '@/utils/bidi';
+import { isReadStatus, normalizeStatus } from '@/utils/statusNormalizer';
 
 interface VideoPreviewProps {
     video: VideoSummary | null;
@@ -59,10 +60,10 @@ export function VideoPreview({ video, onOpenDetails, onOpenYouTube }: VideoPrevi
                         <Badge variant={priorityColors[video.priority]}>
                             {capitalize(video.priority)}
                         </Badge>
-                        {video.status === 'new' && (
+                        {normalizeStatus(video.status) === 'new' && (
                             <Badge variant="info">NEW</Badge>
                         )}
-                        {video.status === 'read' && (
+                        {isReadStatus(video.status) && (
                             <Badge variant="success">READ</Badge>
                         )}
                         {video.category && (

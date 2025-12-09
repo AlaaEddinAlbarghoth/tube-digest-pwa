@@ -40,6 +40,7 @@ interface VideosState {
     totalMatching: number | null; // Total count of videos matching filters (from API)
     totalLoaded: number; // Current count of videos loaded in store
     newestVideo: NewestVideoInfo | null;
+    pendingReadById: Record<string, boolean>; // Track videos with pending read status updates
 
     // Actions
     fetchVideos: (signal?: AbortSignal, preserveList?: boolean) => Promise<void>;
@@ -86,6 +87,7 @@ export const useVideosStore = create<VideosState>((set, get) => ({
     // Initial state
     videos: {},
     videoIds: [],
+    pendingReadById: {},
     loading: false,
     error: null,
     filters: getDefaultFilters(), // Will be updated when backendInfo loads
@@ -174,8 +176,24 @@ export const useVideosStore = create<VideosState>((set, get) => ({
             // Note: When preserveList=true (auto-refresh), this replaces the entire videos map
             // This is correct because the backend should have the latest status after markAsRead
             // If markAsRead failed, the error handler already reverted the optimistic update
+            // However, we preserve pending updates: if a video has a pending read update,
+            // we keep its optimistic status instead of overwriting with potentially stale backend data
+            const currentPending = get().pendingReadById;
+            const mergedVideos: Record<string, VideoSummary> = { ...videosMap };
+            
+            // Preserve optimistic status for videos with pending updates
+            Object.keys(currentPending).forEach((pendingId) => {
+                if (currentPending[pendingId] && get().videos[pendingId]) {
+                    // Keep the optimistic status if pending
+                    mergedVideos[pendingId] = {
+                        ...mergedVideos[pendingId],
+                        status: get().videos[pendingId].status,
+                    };
+                }
+            });
+
             set({
-                videos: videosMap,
+                videos: mergedVideos,
                 videoIds,
                 loading: false,
                 hasMore: false, // Backend doesn't support pagination yet
@@ -310,6 +328,7 @@ export const useVideosStore = create<VideosState>((set, get) => ({
      * Mark a video as read with optimistic update
      * Updates UI immediately, then syncs with backend
      * Reverts on error with user feedback
+     * Tracks pending state to prevent flicker during save
      */
     markAsRead: async (videoId: string) => {
         const state = get();
@@ -320,10 +339,18 @@ export const useVideosStore = create<VideosState>((set, get) => ({
             return;
         }
 
+        // Prevent duplicate requests
+        if (state.pendingReadById[videoId]) {
+            if (import.meta.env.DEV) {
+                console.warn('[VideosStore] markAsRead: Already pending for', videoId);
+            }
+            return;
+        }
+
         // Store original status for revert
         const originalStatus = existingVideo.status;
 
-        // Optimistic update: update UI immediately
+        // Set pending flag and optimistic update
         set((state) => ({
             videos: {
                 ...state.videos,
@@ -332,15 +359,26 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                     status: 'read',
                 },
             },
+            pendingReadById: {
+                ...state.pendingReadById,
+                [videoId]: true,
+            },
             error: null, // Clear any previous errors
         }));
 
         try {
             // Sync with backend
             await VideosApi.markVideoRead(videoId);
-            // Success - optimistic update remains
+            // Success - optimistic update remains, clear pending flag
+            set((state) => ({
+                pendingReadById: {
+                    ...state.pendingReadById,
+                    [videoId]: false,
+                },
+            }));
         } catch (error) {
-            // Revert optimistic update on error
+            // Revert optimistic update on error and clear pending flag
+            const errorMessage = error instanceof ApiError ? error.getUserMessage() : (error as Error).message;
             set((state) => ({
                 videos: {
                     ...state.videos,
@@ -349,7 +387,11 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                         status: originalStatus,
                     },
                 },
-                error: error instanceof ApiError ? error.getUserMessage() : (error as Error).message,
+                pendingReadById: {
+                    ...state.pendingReadById,
+                    [videoId]: false,
+                },
+                error: errorMessage,
             }));
         }
     },

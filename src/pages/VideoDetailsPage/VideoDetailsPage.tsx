@@ -11,6 +11,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { formatVideoDuration, capitalize } from '@/utils/formatters';
 import { bidiTextClass, bidiPlainClass } from '@/utils/bidi';
 import { isVideoMissingSummaries } from '@/utils/videoFilters';
+import { isReadStatus } from '@/utils/statusNormalizer';
 
 interface AccordionProps {
     title: string;
@@ -44,12 +45,22 @@ function Accordion({ title, children, defaultOpen = false }: AccordionProps) {
 export function VideoDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { videos, markAsRead, fetchVideos, loading: listLoading, lastUpdated, totalMatching, totalLoaded } = useVideosStore();
+    const { videos, markAsRead, fetchVideos, loading: listLoading, lastUpdated, totalMatching, totalLoaded, pendingReadById, error: storeError } = useVideosStore();
     const [video, setVideo] = useState<VideoSummary | null>(id ? videos[id] || null : null);
     const [loading, setLoading] = useState(!video);
     const [error, setError] = useState<string | null>(null);
     const [actionItems, setActionItems] = useState<Record<number, boolean>>({});
     const [refreshing, setRefreshing] = useState(false);
+
+    // Sync local video state with store when store updates
+    useEffect(() => {
+        if (!id) return;
+        const storeVideo = videos[id];
+        if (storeVideo) {
+            // Update local state with store data (this handles optimistic updates and auto-refresh)
+            setVideo(storeVideo);
+        }
+    }, [id, videos]);
 
     useEffect(() => {
         if (!id) return;
@@ -66,23 +77,29 @@ export function VideoDetailsPage() {
             }
         };
 
-        if (!video) {
+        // Only load from API if not in store and not already loading
+        if (!video && !loading) {
             loadVideo();
         }
-    }, [id, video]);
+    }, [id]); // Remove 'video' from deps to avoid infinite loop
 
     const handleMarkAsRead = async () => {
-        if (!video) return;
-        // Optimistic update: update local state immediately
-        setVideo(prev => prev ? { ...prev, status: 'read' } : null);
-        // Store will also update optimistically, then sync with backend
-        await markAsRead(video.id);
-        // Sync with store after API call (in case store has more recent data)
-        const storeVideo = videos[video.id];
-        if (storeVideo) {
-            setVideo(storeVideo);
-        }
+        if (!video || !id) return;
+        // Store handles optimistic update, we just need to call it
+        // Local state will sync via useEffect when store updates
+        await markAsRead(id);
     };
+
+    // Derive toggle state from normalized status and pending state
+    const isRead = useMemo(() => {
+        if (!video) return false;
+        return isReadStatus(video.status);
+    }, [video]);
+
+    const isPending = useMemo(() => {
+        if (!id) return false;
+        return pendingReadById[id] === true;
+    }, [id, pendingReadById]);
 
 
 
@@ -145,7 +162,7 @@ export function VideoDetailsPage() {
                             {capitalize(video.priority)} Priority
                         </Badge>
                         {video.status === 'new' && <Badge variant="info">NEW</Badge>}
-                        {video.status === 'read' && <Badge variant="success">READ</Badge>}
+                        {isRead && <Badge variant="success">READ</Badge>}
                         {video.category && <Badge variant="default"><span className={bidiTextClass(video.category)}>{video.category}</span></Badge>}
                         {missingAllSummaries && (
                             <Badge variant="default">
@@ -301,12 +318,17 @@ export function VideoDetailsPage() {
                 {/* Mark as Read */}
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                     <Toggle
-                        checked={video.status === 'read'}
+                        checked={isRead}
                         onChange={handleMarkAsRead}
                         label="Mark as Read"
-                        description="سيتم وضع علامة على هذا الفيديو كمقروء وفلترته وفقًا لذلك"
-                        disabled={video.status === 'read'}
+                        description={isPending ? "جارٍ الحفظ..." : "سيتم وضع علامة على هذا الفيديو كمقروء وفلترته وفقًا لذلك"}
+                        disabled={isRead || isPending}
                     />
+                    {storeError && (
+                        <p className="mt-2 text-sm text-red-500 dark:text-red-400 rtl-text">
+                            {storeError}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
