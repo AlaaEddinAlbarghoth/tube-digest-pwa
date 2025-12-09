@@ -45,6 +45,9 @@ interface GetVideoResponse {
  */
 interface MarkVideoReadResponse {
     success: boolean;
+    videoId?: string;
+    status?: string;
+    updatedAt?: string;
 }
 
 /**

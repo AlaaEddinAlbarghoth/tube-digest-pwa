@@ -51,6 +51,7 @@ interface VideosState {
     setPriority: (priority: Priority | null) => void;
     setSort: (sort: SortOption) => void;
     resetFilters: () => void;
+    updateVideoLocal: (videoId: string, patch: Partial<VideoSummary>) => void;
     markAsRead: (videoId: string) => Promise<void>;
     clearError: () => void;
 }
@@ -170,6 +171,9 @@ export const useVideosStore = create<VideosState>((set, get) => ({
                 });
             }
 
+            // Note: When preserveList=true (auto-refresh), this replaces the entire videos map
+            // This is correct because the backend should have the latest status after markAsRead
+            // If markAsRead failed, the error handler already reverted the optimistic update
             set({
                 videos: videosMap,
                 videoIds,
@@ -282,25 +286,71 @@ export const useVideosStore = create<VideosState>((set, get) => ({
     },
 
     /**
-     * Mark a video as read
+     * Update a single video locally (for optimistic updates)
+     */
+    updateVideoLocal: (videoId: string, patch: Partial<VideoSummary>) => {
+        const state = get();
+        const existingVideo = state.videos[videoId];
+        if (!existingVideo) {
+            console.warn('updateVideoLocal: Video not found:', videoId);
+            return;
+        }
+        set({
+            videos: {
+                ...state.videos,
+                [videoId]: {
+                    ...existingVideo,
+                    ...patch,
+                },
+            },
+        });
+    },
+
+    /**
+     * Mark a video as read with optimistic update
+     * Updates UI immediately, then syncs with backend
+     * Reverts on error with user feedback
      */
     markAsRead: async (videoId: string) => {
-        try {
-            await VideosApi.markVideoRead(videoId);
+        const state = get();
+        const existingVideo = state.videos[videoId];
+        
+        if (!existingVideo) {
+            set({ error: 'Video not found' });
+            return;
+        }
 
-            // Update local state
+        // Store original status for revert
+        const originalStatus = existingVideo.status;
+
+        // Optimistic update: update UI immediately
+        set((state) => ({
+            videos: {
+                ...state.videos,
+                [videoId]: {
+                    ...state.videos[videoId],
+                    status: 'read',
+                },
+            },
+            error: null, // Clear any previous errors
+        }));
+
+        try {
+            // Sync with backend
+            await VideosApi.markVideoRead(videoId);
+            // Success - optimistic update remains
+        } catch (error) {
+            // Revert optimistic update on error
             set((state) => ({
                 videos: {
                     ...state.videos,
                     [videoId]: {
                         ...state.videos[videoId],
-                        status: 'read',
+                        status: originalStatus,
                     },
                 },
+                error: error instanceof ApiError ? error.getUserMessage() : (error as Error).message,
             }));
-        } catch (error) {
-            const message = error instanceof ApiError ? error.getUserMessage() : (error as Error).message;
-            set({ error: message });
         }
     },
 

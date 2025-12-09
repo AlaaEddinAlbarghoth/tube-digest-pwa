@@ -949,6 +949,16 @@ curl "YOUR_BACKEND_URL?action=listVideos&range=3d&apiToken=YOUR_TOKEN&_cb=$(date
     2.  Reload the page (Cmd+Shift+R).
 - **Default Filters:** The app defaults to recent data (3d). Check if your backend has processed new videos recently using the Activity Log.
 
+### Mark as Read Not Persisting
+- **Optimistic Updates:** The UI updates immediately when you mark a video as read (optimistic update), then syncs with the backend.
+- **If status reverts after refresh:**
+  - Check that the backend `markVideoRead` endpoint updated both Videos and Summaries sheets
+  - Verify the video exists in at least one sheet (Videos or Summaries)
+  - Check browser console for API errors
+  - Verify backend logs show "handleMarkVideoRead_: Success" entries
+- **Error Handling:** If the backend update fails, the UI automatically reverts the status change and shows an error message.
+- **Auto-Refresh:** After marking as read, the next auto-refresh should show the correct status from the backend. If it doesn't, the backend update may have failed silently.
+
 ### Styling / Dark Mode
 - **Tailwind v4 Note:** We use a custom variant `@custom-variant dark (&:where(.dark, .dark *));` in `src/styles/globals.css` because standard Tailwind v4 dark mode relies purely on system reference. This custom rule allows our specific `.dark` class toggle to work correctly to support manual theme switching.
 

@@ -73,8 +73,15 @@ export function VideoDetailsPage() {
 
     const handleMarkAsRead = async () => {
         if (!video) return;
-        await markAsRead(video.id);
+        // Optimistic update: update local state immediately
         setVideo(prev => prev ? { ...prev, status: 'read' } : null);
+        // Store will also update optimistically, then sync with backend
+        await markAsRead(video.id);
+        // Sync with store after API call (in case store has more recent data)
+        const storeVideo = videos[video.id];
+        if (storeVideo) {
+            setVideo(storeVideo);
+        }
     };
 
 
