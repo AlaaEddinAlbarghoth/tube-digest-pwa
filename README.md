@@ -506,6 +506,12 @@ The PWA includes several UX improvements for better usability and scalability. T
 - Retry uses `fetchVideos(undefined, true)` to preserve scroll and list
 - Works alongside the manual refresh button; both respect loading/disabled state
 
+**Video Details Summary State:**
+- Details page uses the same `isVideoMissingSummaries` helper to detect missing summaries
+- Shows "بدون ملخص بعد" badge and neutral notice when all summaries are missing
+- Each summary section (short/medium/full) shows a subtle placeholder if that level is missing
+- Details header shows context counts ("ضمن نتائج آخر تحميل: X من Y") and last updated with inline refresh button; refresh preserves scroll
+
 ---
 
 ## 🎨 Design System
