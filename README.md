@@ -512,6 +512,14 @@ The PWA includes several UX improvements for better usability and scalability. T
 - Each summary section (short/medium/full) shows a subtle placeholder if that level is missing
 - Details header shows context counts ("ضمن نتائج آخر تحميل: X من Y") and last updated with inline refresh button; refresh preserves scroll
 
+## 📲 PWA Install & Launch
+
+- The app ships a Web App Manifest with `display: standalone`, scope `/`, start_url `/`, and installable icons.
+- An install button ("تثبيت التطبيق") appears in the header when the browser supports install prompts and the app is not already installed.
+- After install is accepted, a small inline hint confirms the app is available from the home screen.
+- We do not force-open the PWA after install (browsers prevent this); user opens it from the home screen/app launcher.
+- Settings include a short help section for Android Chrome on how to add to home screen when the prompt is unavailable.
+
 ---
 
 ## 🎨 Design System

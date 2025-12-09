@@ -6,6 +6,7 @@ import { Toggle } from '@/components/shared/Toggle';
 import { Button } from '@/components/shared/Button';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { getBackendBaseUrl } from '@/config/runtimeConfig';
+import { usePwaInstallPrompt } from '@/hooks/usePwaInstallPrompt';
 import { VideosApi } from '@/api/videosApi';
 import type { ThemeMode } from '@/types/enums';
 
@@ -32,6 +33,7 @@ export function SettingsPage() {
         returnedCount: null,
         newestTitle: null,
     });
+    const { canInstall, isStandalone } = usePwaInstallPrompt();
 
     useEffect(() => {
         loadSettings();
@@ -264,6 +266,26 @@ export function SettingsPage() {
                     </div>
                 </Card>
             </section>
+
+            {/* PWA Install Help */}
+            {!isStandalone && !canInstall && (
+                <section>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        كيفية تثبيت التطبيق
+                    </h2>
+                    <Card className="p-4 space-y-2 text-sm text-gray-700 dark:text-gray-300 rtl-text">
+                        <p className="font-medium">على أندرويد (Chrome):</p>
+                        <ol className="list-decimal list-inside space-y-1">
+                            <li>اضغط على ⋮ (القائمة) في الزاوية العلوية</li>
+                            <li>اختر "إضافة إلى الشاشة الرئيسية"</li>
+                            <li>وافق على التثبيت، ثم افتح التطبيق من الشاشة الرئيسية</li>
+                        </ol>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            عند توفر زر "تثبيت التطبيق" سيظهر في أعلى التطبيق.
+                        </p>
+                    </Card>
+                </section>
+            )}
 
             {/* Backend Info Section */}
             <section>

@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { IconButton } from '@/components/shared/IconButton';
+import { Button } from '@/components/shared/Button';
+import { usePwaInstallPrompt } from '@/hooks/usePwaInstallPrompt';
 
 interface TopBarProps {
     title: string;
@@ -7,6 +9,7 @@ interface TopBarProps {
 
 export function TopBar({ title }: TopBarProps) {
     const navigate = useNavigate();
+    const { canInstall, promptInstall, isStandalone, installedHint, setInstalledHint } = usePwaInstallPrompt();
 
     // Get build marker (short SHA or version)
     // Prefer __BUILD_SHA__ (injected at build time), fallback to __GIT_SHA__
@@ -30,9 +33,28 @@ export function TopBar({ title }: TopBarProps) {
                     <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono ltr-text">
                         Build: {buildMarker}
                     </span>
+                    {installedHint && !isStandalone && (
+                        <span className="text-[11px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">
+                            تم التثبيت. يمكنك فتح التطبيق من الشاشة الرئيسية.
+                        </span>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {!isStandalone && canInstall && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                                const res = await promptInstall();
+                                if (res.accepted) {
+                                    setInstalledHint(true);
+                                }
+                            }}
+                        >
+                            تثبيت التطبيق
+                        </Button>
+                    )}
                     <IconButton
                         icon="⚙️"
                         onClick={() => navigate('/settings')}
