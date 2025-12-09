@@ -12,6 +12,7 @@ import { Button } from '@/components/shared/Button';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { useDebounce } from '@/hooks/useDebounce';
 import { sortVideos } from '@/utils/sortVideos';
+import { isVideoMissingSummaries } from '@/utils/videoFilters';
 import type { DateRangeKey, Priority, VideoStatus } from '@/types/enums';
 import type { VideoSummary } from '@/types/video';
 
@@ -42,6 +43,7 @@ export function TodayDigestPage() {
     const [searchInput, setSearchInput] = useState(filters.search);
     const [selectedVideo, setSelectedVideo] = useState<VideoSummary | null>(null);
     const debouncedSearch = useDebounce(searchInput, 200);
+    const [showNoSummaryOnly, setShowNoSummaryOnly] = useState(false);
 
     // Sync debounced search to store
     useEffect(() => {
@@ -87,7 +89,7 @@ export function TodayDigestPage() {
     }, [fetchVideos, loadSettings]);
 
     // Filter and sort videos locally - memoized to avoid unnecessary re-computation
-    // This is a single derived list that combines search filter and sort
+    // Order: base list -> search -> no-summary filter -> sort
     const filteredVideos = useMemo(() => {
         const videoList = videoIds
             .map(id => videos[id])
@@ -98,9 +100,13 @@ export function TodayDigestPage() {
                     video.title.toLowerCase().includes(searchLower) ||
                     video.channelName.toLowerCase().includes(searchLower)
                 );
+            })
+            .filter((video) => {
+                if (!showNoSummaryOnly) return true;
+                return isVideoMissingSummaries(video);
             });
         return sortVideos(videoList, filters.sort);
-    }, [videoIds, videos, filters.search, filters.sort]);
+    }, [videoIds, videos, filters.search, filters.sort, showNoSummaryOnly]);
 
     const tabs: { label: string; value: TabValue }[] = [
         { label: '7 Days', value: '7d' },
@@ -204,6 +210,20 @@ export function TodayDigestPage() {
                             {' / '}
                             <span>{totalMatching !== null ? totalMatching : '--'}</span>
                         </span>
+                        {/* Inline error hint */}
+                        {error && (
+                            <span className="text-[11px] text-red-500 dark:text-red-400 flex items-center gap-2">
+                                تعذر التحديث
+                                <Button
+                                    size="xs"
+                                    variant="outline"
+                                    onClick={() => fetchVideos(undefined, true)}
+                                    isLoading={loading}
+                                >
+                                    إعادة المحاولة
+                                </Button>
+                            </span>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         {lastUpdated && (
@@ -229,7 +249,7 @@ export function TodayDigestPage() {
                     </div>
                 </div>
                 
-                {/* Sort control */}
+                {/* Sort control + No summary quick filter */}
                 <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Sort:</span>
@@ -257,6 +277,11 @@ export function TodayDigestPage() {
                             label="Priority"
                             isActive={filters.sort === 'priority-high'}
                             onClick={() => setSort('priority-high')}
+                        />
+                        <Chip
+                            label="بدون ملخص"
+                            isActive={showNoSummaryOnly}
+                            onClick={() => setShowNoSummaryOnly((v) => !v)}
                         />
                     </div>
                 </div>

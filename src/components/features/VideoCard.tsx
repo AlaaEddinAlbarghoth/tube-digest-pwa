@@ -5,6 +5,7 @@ import { Badge } from '@/components/shared/Badge';
 import { Button } from '@/components/shared/Button';
 import { formatVideoDuration, capitalize } from '@/utils/formatters';
 import { bidiTextClass } from '@/utils/bidi';
+import { isVideoMissingSummaries } from '@/utils/videoFilters';
 
 interface VideoCardProps {
     video: VideoSummary;
@@ -73,7 +74,7 @@ export function VideoCard({ video, onOpenDetails, onOpenYouTube }: VideoCardProp
                 )}
 
                 {/* No summary badge */}
-                {!video.shortSummary && !video.mediumSummary && !video.fullSummary && (
+                {isVideoMissingSummaries(video) && (
                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-500 rounded-full rtl-text">
                         بدون ملخص بعد
                     </span>

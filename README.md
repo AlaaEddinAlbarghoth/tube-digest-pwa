@@ -495,6 +495,17 @@ The PWA includes several UX improvements for better usability and scalability. T
 - Automatically disappears when a summary becomes available
 - Uses neutral gray styling to indicate pending state without alarming the user
 
+**No Summary Quick Filter:**
+- A compact toggle labeled "بدون ملخص" in the sticky header filters the visible list to videos with no summaries
+- UI-only filter (does not change store data); integrates with existing search and sort pipeline
+- Order of operations: store list → search filter → no-summary filter → sort
+- State is per-page session (local component state)
+
+**Inline Retry in Header:**
+- If a fetch fails, shows "تعذر التحديث" with a small retry button "إعادة المحاولة" near the counts line
+- Retry uses `fetchVideos(undefined, true)` to preserve scroll and list
+- Works alongside the manual refresh button; both respect loading/disabled state
+
 ---
 
 ## 🎨 Design System
