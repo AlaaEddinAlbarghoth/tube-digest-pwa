@@ -368,7 +368,12 @@ export const useVideosStore = create<VideosState>((set, get) => ({
 
         try {
             // Sync with backend
-            await VideosApi.markVideoRead(videoId);
+            const response = await VideosApi.markVideoRead(videoId);
+
+            if (!response.success) {
+                throw new ApiError(response.error || 'Failed to update status', undefined, response.code);
+            }
+
             // Success - optimistic update remains, clear pending flag
             set((state) => ({
                 pendingReadById: {

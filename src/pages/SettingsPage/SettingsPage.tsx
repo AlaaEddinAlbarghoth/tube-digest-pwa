@@ -6,8 +6,8 @@ import { Toggle } from '@/components/shared/Toggle';
 import { Button } from '@/components/shared/Button';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { getBackendBaseUrl } from '@/config/runtimeConfig';
-import { usePwaInstallPrompt } from '@/hooks/usePwaInstallPrompt';
 import { VideosApi } from '@/api/videosApi';
+import { usePwaInstallPrompt } from '@/hooks/usePwaInstallPrompt';
 import type { ThemeMode } from '@/types/enums';
 
 export function SettingsPage() {
@@ -24,6 +24,9 @@ export function SettingsPage() {
 
     const [debugTitles, setDebugTitles] = useState<string[]>([]);
     const [debugLoading, setDebugLoading] = useState(false);
+    const [testVideoId, setTestVideoId] = useState('');
+    const [testResult, setTestResult] = useState<string | null>(null);
+    const [testLoading, setTestLoading] = useState(false);
     const [snapshot, setSnapshot] = useState<{
         totalMatching: number | null;
         returnedCount: number | null;
@@ -286,6 +289,63 @@ export function SettingsPage() {
                     </Card>
                 </section>
             )}
+
+            {/* Backend Diagnostics */}
+            <section>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Backend Diagnostics
+                </h2>
+                <Card className="p-4 space-y-4">
+                    <div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">Resolved Backend URL</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 break-all ltr-text">
+                            {getBackendBaseUrl()}
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Test mark-as-read</p>
+                        <input
+                            type="text"
+                            value={testVideoId}
+                            onChange={(e) => setTestVideoId(e.target.value)}
+                            placeholder="Enter videoId to test"
+                            className="w-full rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-200"
+                        />
+                        <div className="flex items-center gap-2">
+                            <Button
+                                size="sm"
+                                onClick={async () => {
+                                    if (!testVideoId) return;
+                                    setTestLoading(true);
+                                    setTestResult(null);
+                                    try {
+                                        const res = await VideosApi.markVideoRead(testVideoId);
+                                        if (res.success) {
+                                            setTestResult(`✅ Success: status=${res.status || 'read'}, updatedAt=${res.updatedAt || 'n/a'}`);
+                                        } else {
+                                            setTestResult(`⚠️ Failed: ${res.error || 'Unknown error'} (${res.code || 'no-code'})`);
+                                        }
+                                    } catch (err) {
+                                        setTestResult(`❌ Error: ${(err as Error).message}`);
+                                    } finally {
+                                        setTestLoading(false);
+                                    }
+                                }}
+                                isLoading={testLoading}
+                            >
+                                Test
+                            </Button>
+                            {testResult && (
+                                <span className="text-xs text-gray-700 dark:text-gray-300">{testResult}</span>
+                            )}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            This sends a real mark-as-read call. Use a test videoId.
+                        </p>
+                    </div>
+                </Card>
+            </section>
 
             {/* Backend Info Section */}
             <section>

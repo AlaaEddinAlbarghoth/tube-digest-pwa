@@ -17,7 +17,8 @@ export interface RuntimeConfig {
 
 // Hardcoded fallback backend URL (production Apps Script deployment)
 // This ensures the app never fails due to missing configuration
-const FALLBACK_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxIcyOCoF1ELz2yRKFFpSH8Y_Uu38KaJoDXpjeYXkM7_ue-0mhL9UqQ5-ZdXz3ldPyk/exec';
+// Updated fallback to current HEAD deployment
+const FALLBACK_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzWQydXbalF4M5MlU1IzdbtxAfywG6dzqjp2wGL7S4/exec';
 
 let cachedConfig: RuntimeConfig | null = null;
 

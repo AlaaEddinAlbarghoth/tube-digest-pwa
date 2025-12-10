@@ -41,6 +41,15 @@ interface GetVideoResponse {
 }
 
 /**
+ * API action names
+ */
+export const VIDEO_ACTIONS = {
+    LIST: 'listVideos',
+    GET: 'getVideo',
+    MARK_READ: 'markVideoRead',
+} as const;
+
+/**
  * Response from markVideoRead API
  */
 interface MarkVideoReadResponse {
@@ -48,6 +57,8 @@ interface MarkVideoReadResponse {
     videoId?: string;
     status?: string;
     updatedAt?: string;
+    error?: string;
+    code?: string;
 }
 
 /**
@@ -63,7 +74,7 @@ export const VideosApi = {
      */
     async getVideos(params: VideosQuery, signal?: AbortSignal): Promise<ListVideosResponse> {
         const response = await get<ListVideosResponse>(
-            'listVideos',
+            VIDEO_ACTIONS.LIST,
             params as unknown as Record<string, string>,
             signal
         );
@@ -77,7 +88,7 @@ export const VideosApi = {
      * @returns Video summary with full details
      */
     async getVideoDetails(videoId: string): Promise<VideoSummary> {
-        const response = await get<GetVideoResponse>('getVideo', { videoId });
+        const response = await get<GetVideoResponse>(VIDEO_ACTIONS.GET, { videoId });
         return response.video;
     },
 
@@ -87,8 +98,8 @@ export const VideosApi = {
      * @param videoId - Video ID to mark as read
      * @returns Success status
      */
-    async markVideoRead(videoId: string): Promise<boolean> {
-        const response = await post<MarkVideoReadResponse>('markVideoRead', { videoId });
-        return response.success;
+    async markVideoRead(videoId: string): Promise<MarkVideoReadResponse> {
+        const response = await post<MarkVideoReadResponse>(VIDEO_ACTIONS.MARK_READ, { videoId });
+        return response;
     },
 };
