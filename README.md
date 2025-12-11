@@ -978,7 +978,7 @@ MIT
 ## References
 
 ### Project Reference
-- [Project Idea & Discussion](https://chatgpt.com/c/692fe539-bba8-832f-9a51-2405f17885cc)
+- [Project Idea & Discussion](https://chatgpt.com/c/6932b899-90e0-8328-a6cf-c40cdd06b621)
 
 ### Design Reference
 - [Stitch Project](https://stitch.withgoogle.com/projects/7484079189251965390)
